@@ -1,0 +1,18 @@
+# ignore editor droppings
+\#*\#
+.#*
+*~
+*.swp
+Thumbs.db
+.idea/**/*
+.idea/*
+
+#ignore Mac OS X droppings
+.DS_Store
+
+# ignore rails droppings 
+log/*.log
+tmp/**/*
+doc/api
+doc/app
+db/*.sqlite*
