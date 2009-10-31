@@ -5,7 +5,6 @@ describe GamesController do
   it_should_behave_like "a restfully routed resource"
 
   describe "actions" do
-
     before do
       @resource_class = Game
       @resource = Factory(:game, :name =>"the game")
@@ -15,15 +14,7 @@ describe GamesController do
       @resource_count_before = Game.count
     end
 
-
-    it_should_behave_like "a restfully indexed resource"
-    it_should_behave_like "a restfully shown resource"
-    it_should_behave_like "a restfully newed resource"
-    it_should_behave_like "a restfully edited resource"
-    it_should_behave_like "a restfully created resource"
-    it_should_behave_like "a restfully updated resource"
-    it_should_behave_like "a restfully destroyed resource"
-    
+    it_should_behave_like "a restfully controlled resource"
 
   end
 end

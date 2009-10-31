@@ -182,3 +182,13 @@ shared_examples_for "a restfully routed resource" do
     end
   end
 end
+
+shared_examples_for "a restfully controlled resource" do
+  it_should_behave_like "a restfully indexed resource"
+  it_should_behave_like "a restfully shown resource"
+  it_should_behave_like "a restfully newed resource"
+  it_should_behave_like "a restfully edited resource"
+  it_should_behave_like "a restfully created resource"
+  it_should_behave_like "a restfully updated resource"
+  it_should_behave_like "a restfully destroyed resource"
+end
