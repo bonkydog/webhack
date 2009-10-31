@@ -7,8 +7,8 @@ describe GamesController do
   describe "actions" do
     before do
       @resource_class = Game
-      @resource = Factory(:game, :name =>"the game")
-      @other_resource= Factory(:game, :name =>"the other game")
+      @resource = Factory(:game)
+      @other_resource= Factory(:game)
       @good_attributes = HashWithIndifferentAccess.new(Factory.attributes_for(:game))
       @bad_attributes = HashWithIndifferentAccess.new(Factory.attributes_for(:game, :pid => "Xorn"))
       @resource_count_before = Game.count

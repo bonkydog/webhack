@@ -1,3 +1,38 @@
+shared_examples_for "a restfully routed resource" do
+
+  describe "resource routes" do
+
+    before do
+      @resource_name = described_class.name.sub(/Controller$/, '').underscore
+      @resource_symbol = @resource_name.to_sym
+    end
+
+    it "should route to restful index" do
+      should route(:get, "/#{@resource_name}").to(:controller => @resource_symbol, :action => :index)
+    end
+
+    it "should route to restful show" do
+      should route(:get, "/#{@resource_name}/1").to(:controller => @resource_symbol, :action => :show, :id => 1)
+    end
+
+    it "should route to restful edit" do
+      should route(:get, "/#{@resource_name}/1/edit").to(:controller => @resource_symbol, :action => :edit, :id => 1)
+    end
+
+    it "should route to restful create" do
+      should route(:post, "/#{@resource_name}").to(:controller => @resource_symbol, :action => :create)
+    end
+
+    it "should route to restful update" do
+      should route(:put, "/#{@resource_name}/1").to(:controller => @resource_symbol, :action => :update, :id => 1)
+    end
+
+    it "should route to restful destroy" do
+      should route(:delete, "/#{@resource_name}/1").to(:controller => @resource_symbol, :action => :destroy, :id=> 1)
+    end
+  end
+end
+
 
 class Hash
   def without_automatic_fields
@@ -7,12 +42,27 @@ class Hash
   end
 end
 
+##################################################################################
+#
+# Restful controller examples.
+#
+# these require a little flock of ivars:
+#
+#      @resource_class -- the class under test
+#      @resource -- a valid, db stored instance
+#      @other_resource -- another one
+#      @good_attributes -- valid attributes
+#      @bad_attributes -- invalid attributes
+#      @resource_count_before -- count of stored instances before invoking examples.
+
 
 shared_examples_for "a restfully indexed resource" do
   describe "#index" do
-    it "should fetch and assign all resources for listing" do
-      get :index
-      assigns(@resource_class.to_s.underscore.pluralize.to_sym).should =~ [@resource, @other_resource]
+    before do
+      it "should fetch and assign all resources for listing" do
+        get :index
+        assigns(@resource_class.to_s.underscore.pluralize.to_sym).should =~ [@resource, @other_resource]
+      end
     end
   end
 end
@@ -147,41 +197,6 @@ shared_examples_for "a restfully destroyed resource" do
   end
 end
 
-
-shared_examples_for "a restfully routed resource" do
-
-  describe "resource routes" do
-
-    before do
-      @name = described_class.name.sub(/Controller$/, '').underscore
-      @resource_symbol = @name.to_sym
-    end
-
-    it "should route to restful index" do
-      should route(:get, "/#{@name}").to(:controller => @resource_symbol, :action => :index)
-    end
-
-    it "should route to restful show" do
-      should route(:get, "/#{@name}/1").to(:controller => @resource_symbol, :action => :show, :id => 1)
-    end
-
-    it "should route to restful edit" do
-      should route(:get, "/#{@name}/1/edit").to(:controller => @resource_symbol, :action => :edit, :id => 1)
-    end
-
-    it "should route to restful create" do
-      should route(:post, "/#{@name}").to(:controller => @resource_symbol, :action => :create)
-    end
-
-    it "should route to restful update" do
-      should route(:put, "/#{@name}/1").to(:controller => @resource_symbol, :action => :update, :id => 1)
-    end
-
-    it "should route to restful destroy" do
-      should route(:delete, "/#{@name}/1").to(:controller => @resource_symbol, :action => :destroy, :id=> 1)
-    end
-  end
-end
 
 shared_examples_for "a restfully controlled resource" do
   it_should_behave_like "a restfully indexed resource"
