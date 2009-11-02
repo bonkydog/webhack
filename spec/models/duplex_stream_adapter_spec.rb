@@ -42,19 +42,40 @@ describe DuplexStreamAdapter do
       context "when stream is ready to be read" do
         before do
           @stream.ready = true
-          @adapter.read_if_ready(@stream, @buffer)
         end
 
-        it "should read a character from the stream" do
-          @stream.should have_received.sysread(1)
+        context "when buffer is not full" do
+          before do
+            @adapter.read_if_ready(@stream, @buffer)
+          end
+
+          it "should read a character from the stream" do
+            @stream.should have_received.sysread(1)
+          end
+
+          it "should append the character read from the stream to the buffer" do
+            @buffer.first.should == ?X
+          end
+
+          it "should mark the stream unready" do
+            @stream.should_not be_ready
+          end
         end
 
-        it "should append the character read from the stream to the buffer" do
-          @buffer.first.should == ?X
-        end
+        context "when buffer is full" do
+          before do
+            @buffer = [?f, ?u, ?l, ?l]
+            @adapter.max_buffer_size = 4
+            @adapter.read_if_ready(@stream, @buffer)
+          end
 
-        it "should mark the stream unready" do
-          @stream.should_not be_ready
+          it "should not change the buffer" do
+            @buffer == []
+          end
+
+          it "should not attempt to read from the stream" do
+            @stream.should_not have_received.sysread(anything)
+          end
         end
 
       end

@@ -12,7 +12,9 @@ class DuplexStreamAdapter
   cattr_accessor :logger
   self.logger = Logger.new(STDERR)
   self.logger.level = $DEBUG ? Logger::DEBUG : Logger::INFO
-   
+
+  attr_accessor :max_buffer_size
+
   def initialize(coming_down, coming_up, going_down, going_up)
     
     @coming_down = coming_down
@@ -24,6 +26,8 @@ class DuplexStreamAdapter
 
     @incoming_streams = [@coming_up, @coming_down]
     @outgoing_streams = [@going_up, @going_down]
+
+    @max_buffer_size = 2048
   end
 
   def add_ready_attribute_to(stream)
@@ -37,6 +41,7 @@ class DuplexStreamAdapter
   end
 
   def read_if_ready(source, buffer)
+    return unless buffer.size < max_buffer_size
     return unless source.ready?
     incoming_character = source.sysread(1)[0]
     logger.debug "incoming_character=#{incoming_character}"
