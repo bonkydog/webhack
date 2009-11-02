@@ -5,16 +5,14 @@ require "activesupport"
 require "pp"
 
 class DuplexStreamAdapter
-
+  
   SELECT_READABLE_TIMEOUT_SECONDS = 10
   SELECT_WRITABLE_TIMEOUT_SECONDS = 0
-
 
   cattr_accessor :logger
   self.logger = Logger.new(STDERR)
   self.logger.level = $DEBUG ? Logger::DEBUG : Logger::INFO
-
-
+   
   def initialize(coming_down, coming_up, going_down, going_up)
     @coming_down = coming_down
     @coming_up = coming_up
@@ -31,7 +29,7 @@ class DuplexStreamAdapter
   end
 
   def write_if_ready(writable_streams, sink, buffer)
-    return if buffer.empty?
+    return if buffer.empty? 
     return unless writable_streams.include?(sink)
     going_up_character = buffer.shift
     logger.debug "going_up_character=#{going_up_character}"
@@ -69,8 +67,8 @@ class DuplexStreamAdapter
         write_if_ready(writable_streams, @going_up, upward_buffer)
         write_if_ready(writable_streams, @going_down, downward_buffer)
 
-      rescue EOFError
-        # ignore
+      rescue EOFError => e
+        logger.debug "Ignoring EOF: #{e.inspect}"
       end
 
     end
