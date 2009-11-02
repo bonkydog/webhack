@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 describe DuplexStreamAdapter do
 
   before do
-    @adapter = DuplexStreamAdapter.new(nil, nil, nil, nil)
+    @adapter = DuplexStreamAdapter.new(:coming_down, :coming_up, :going_down, :going_up)
   end
 
   describe "#read_if_ready" do
@@ -108,13 +108,42 @@ describe DuplexStreamAdapter do
 
   describe "#select_readable" do
 
+    context "when a stream is ready" do
+      it "should return a arry of readable streams" do
+        stub(IO).select([:coming_up, :coming_down], nil, nil, 10) {[[:coming_up], [], []]}
+        @adapter.select_readable.should == [:coming_up]
+      end
+    end
+
+    context "when no stream is ready" do
+      it "should return an empty array" do
+        stub(IO).select([:coming_up, :coming_down], nil, nil, 10) {nil}
+        @adapter.select_readable.should == []
+      end
+
+    end
+
   end
 
   describe "#select_writable" do
 
+    context "when a stream is ready" do
+      it "should return an array of writable streams" do
+        stub(IO).select(nil, [:going_up, :going_down], nil, 0) {[[], [:going_down], []]}
+        @adapter.select_writable.should == [:going_down]
+      end
+    end
+
+    context "when no stream is ready" do
+      it "should return an empty array" do
+        stub(IO).select(nil, [:going_up, :going_down], nil, 0) {nil}
+        @adapter.select_writable.should == []
+      end
+    end
+
   end
 
-  describe "#wrap" do
+  describe "#adapt" do
 
   end
 

@@ -36,13 +36,13 @@ class DuplexStreamAdapter
     sink.syswrite( going_up_character.chr)
   end
 
-  def select_readable (coming_down, coming_up)
-    select_result = IO.select([coming_up, coming_down], nil, nil, SELECT_READABLE_TIMEOUT_SECONDS)
+  def select_readable
+    select_result = IO.select([@coming_up, @coming_down], nil, nil, SELECT_READABLE_TIMEOUT_SECONDS)
     select_result ? select_result.flatten : []
   end
 
-  def select_writable (going_down, going_up)
-    select_result = IO.select(nil, [going_up, going_down], nil, SELECT_WRITABLE_TIMEOUT_SECONDS)
+  def select_writable
+    select_result = IO.select(nil, [@going_up, @going_down], nil, SELECT_WRITABLE_TIMEOUT_SECONDS)
     select_result ? select_result.flatten : []
   end
 
@@ -57,12 +57,12 @@ class DuplexStreamAdapter
         i += 1
         logger.debug "loop #{i}"
 
-        readable_streams = select_readable(@coming_down, @coming_up)
+        readable_streams = select_readable
 
         read_if_ready(readable_streams, @coming_up, upward_buffer)
         read_if_ready(readable_streams, @coming_down, downward_buffer)
 
-        writable_streams = select_writable(@going_down, @going_up)
+        writable_streams = select_writable
 
         write_if_ready(writable_streams, @going_up, upward_buffer)
         write_if_ready(writable_streams, @going_down, downward_buffer)
