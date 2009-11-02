@@ -49,9 +49,14 @@ describe DuplexStreamAdapter do
           @stream.should have_received.sysread(1)
         end
 
-        it "should write the character read from the stream to the end of the buffer" do
+        it "should append the character read from the stream to the buffer" do
           @buffer.first.should == ?X
         end
+
+        it "should mark the stream unready" do
+          @stream.should_not be_ready
+        end
+
       end
 
       context "when stream is not ready to be read" do
@@ -90,6 +95,11 @@ describe DuplexStreamAdapter do
           it "should write the character at the front of the buffer to the stream" do
             @stream.should have_received.syswrite('x')
           end
+
+          it "should mark the stream unready" do
+            @stream.should_not be_ready
+          end
+
         end
 
         context "when stream is not ready to write" do

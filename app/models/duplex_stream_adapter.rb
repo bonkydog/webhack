@@ -38,17 +38,19 @@ class DuplexStreamAdapter
 
   def read_if_ready(source, buffer)
     return unless source.ready?
-    coming_up_character = source.sysread(1)[0]
-    logger.debug "coming_up_character=#{coming_up_character}"
-    buffer.push( coming_up_character)
+    incoming_character = source.sysread(1)[0]
+    logger.debug "incoming_character=#{incoming_character}"
+    buffer.push(incoming_character)
+    source.ready = false
   end
 
   def write_if_ready(sink, buffer)
     return if buffer.empty? 
     return unless sink.ready?
-    going_up_character = buffer.shift
-    logger.debug "going_up_character=#{going_up_character}"
-    sink.syswrite( going_up_character.chr)
+    outgoing_character = buffer.shift
+    logger.debug "outgoing_character=#{outgoing_character}"
+    sink.syswrite( outgoing_character.chr)
+    sink.ready = false
   end
 
   def select_readable
