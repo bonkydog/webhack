@@ -64,7 +64,6 @@ describe Game do
 
 
     describe "#fifo_name" do
-
       it "should generate an downward fifo name" do
         @game.fifo_name(:down).should == "#{@test_temp_dir}/downward_fifo_17_23"
       end
@@ -76,40 +75,35 @@ describe Game do
       it "should not generate bogus fifo names" do
         lambda { @game.fifo_name(:bed) }.should raise_error(ArgumentError)
       end
-
     end
 
     describe "#make_fifo" do
-
       it "should make a fifo" do
         fifo_path = File.join(@test_temp_dir, "i_is_a_fifo")
         Game.make_fifo(fifo_path)
         `ls -l #{fifo_path}`.should =~ /^p/
       end
+    end
 
-      describe "#make_fifos" do
-        it "should make and upward and downward fifos" do
-          @game.make_fifos
-          `ls -l #{@game.fifo_name(:down)}`.should =~ /^p/
-          `ls -l #{@game.fifo_name(:up)}`.should =~ /^p/
-        end
+    describe "#make_fifos" do
+      it "should make and upward and downward fifos" do
+        @game.make_fifos
+        `ls -l #{@game.fifo_name(:down)}`.should =~ /^p/
+        `ls -l #{@game.fifo_name(:up)}`.should =~ /^p/
       end
+    end
 
 
-      describe "#unlink_fifos" do
+    describe "#unlink_fifos" do
+      it "should unlink the upward and downward fifos" do
+        @game.make_fifos
+        @game.unlink_fifos
 
-        it "should unlink the upward and downward fifos" do
-          @game.make_fifos
-          @game.unlink_fifos
-
-          File.exist?(@game.fifo_name(:down)).should be_false
-          File.exist?(@game.fifo_name(:up)).should be_false
-
-        end
-
+        File.exist?(@game.fifo_name(:down)).should be_false
+        File.exist?(@game.fifo_name(:up)).should be_false
       end
-
     end
 
   end
+
 end
