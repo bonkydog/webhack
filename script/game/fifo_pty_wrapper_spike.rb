@@ -2,6 +2,7 @@
 
 
 DEBUGGING_WRAPPER = true
+READ_SELECT_SECONDS = 10
 
 # first, set up the fifos:
 
@@ -40,7 +41,19 @@ def write_if_ready(destination_fifo, ready_streams, buffer)
   destination_fifo.syswrite( going_up_character)
 end
 
-def spike(command, downward_fifo_path, upward_fifo_path)
+def ready_for_read(coming_down, coming_up)
+  select_result = IO.select([coming_up, coming_down], nil, nil, READ_SELECT_SECONDS)
+  ready_streams = select_result ? select_result.flatten : []
+  return ready_streams
+end
+
+def ready_for_write(going_down, going_up)
+  select_result = IO.select(nil, [going_up, going_down], nil, 0)
+  ready_streams = select_result ? select_result.flatten : []
+  return ready_streams
+end
+
+def wrap(command, downward_fifo_path, upward_fifo_path)
 
   coming_down = File.open(downward_fifo_path, File::RDONLY | File::EXCL | File::SYNC)
   going_up = File.open(upward_fifo_path, File::WRONLY | File::EXCL | File::SYNC)
@@ -56,14 +69,12 @@ def spike(command, downward_fifo_path, upward_fifo_path)
         i += 1
         puts "loop #{i}"  if DEBUGGING_WRAPPER
 
-        select_result = IO.select([coming_up, coming_down], nil, nil, 10)
-        ready_streams = select_result ? select_result.flatten : []
+        ready_streams = ready_for_read(coming_down, coming_up)
 
         read_if_ready(coming_up, ready_streams, upward_buffer)
         read_if_ready(coming_down, ready_streams, downward_buffer)
 
-        select_result = IO.select(nil, [going_up, going_down], nil, 0)
-        ready_streams = select_result ? select_result.flatten : []
+        ready_streams = ready_for_write(going_down, going_up)
 
         write_if_ready(going_up, ready_streams, upward_buffer)
         write_if_ready(going_down, ready_streams, downward_buffer)
@@ -77,8 +88,8 @@ end
 
 if File.basename($0) == File.basename(__FILE__)
   unless ARGV.size == 3
-    echo "usage: #$0 command downward_fifo_path upward_fifo_path"
+    puts "usage: #$0 command downward_fifo_path upward_fifo_path"
     exit 1
   end   
-  spike(*ARGV)
+  wrap(*ARGV)
 end
