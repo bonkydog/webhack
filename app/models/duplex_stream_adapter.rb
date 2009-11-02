@@ -20,21 +20,19 @@ class DuplexStreamAdapter
     @coming_up = coming_up
     @going_down = going_down
     @going_up = going_up
-    @readable_streams = []
-    @writable_streams = []
   end
 
-  def read_if_ready(source, buffer)
-    if @readable_streams.include?(source)
+  def read_if_ready(readable_streams, source, buffer)
+    if readable_streams.include?(source)
       coming_up_character = source.sysread(1)[0]
       logger.debug "coming_up_character=#{coming_up_character}"
       buffer.push( coming_up_character)
     end
   end
 
-  def write_if_ready(sink, buffer)
+  def write_if_ready(writable_streams, sink, buffer)
     return if buffer.empty?
-    return unless @writable_streams.include?(sink)
+    return unless writable_streams.include?(sink)
     going_up_character = buffer.shift
     logger.debug "going_up_character=#{going_up_character}"
     sink.syswrite( going_up_character.chr)
@@ -42,12 +40,12 @@ class DuplexStreamAdapter
 
   def select_readable (coming_down, coming_up)
     select_result = IO.select([coming_up, coming_down], nil, nil, SELECT_READABLE_TIMEOUT_SECONDS)
-    @readable_streams = select_result ? select_result.flatten : []
+    select_result ? select_result.flatten : []
   end
 
   def select_writable (going_down, going_up)
     select_result = IO.select(nil, [going_up, going_down], nil, SELECT_WRITABLE_TIMEOUT_SECONDS)
-    @writable_streams = select_result ? select_result.flatten : []
+    select_result ? select_result.flatten : []
   end
 
   def adapt
@@ -61,15 +59,15 @@ class DuplexStreamAdapter
         i += 1
         logger.debug "loop #{i}"
 
-        select_readable(@coming_down, @coming_up)
+        readable_streams = select_readable(@coming_down, @coming_up)
 
-        read_if_ready(@coming_up, upward_buffer)
-        read_if_ready(@coming_down, downward_buffer)
+        read_if_ready(readable_streams, @coming_up, upward_buffer)
+        read_if_ready(readable_streams, @coming_down, downward_buffer)
 
-        select_writable(@going_down, @going_up)
+        writable_streams = select_writable(@going_down, @going_up)
 
-        write_if_ready(@going_up, upward_buffer)
-        write_if_ready(@going_down, downward_buffer)
+        write_if_ready(writable_streams, @going_up, upward_buffer)
+        write_if_ready(writable_streams, @going_down, downward_buffer)
 
       rescue EOFError
         # ignore

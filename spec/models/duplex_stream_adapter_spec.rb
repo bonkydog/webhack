@@ -15,11 +15,11 @@ describe DuplexStreamAdapter do
 
       before do
         @stream = mock!.sysread(1) {[?X.to_i]}.subject
-        @adapter.instance_variable_set("@readable_streams", [@stream])
+        @readable_streams = [@stream]
       end
 
       it "should read a character from the stream and push it onto the buffer" do
-        @adapter.read_if_ready(@stream, @buffer)
+        @adapter.read_if_ready(@readable_streams, @stream, @buffer)
         @buffer.first.should == ?X
       end
 
@@ -27,12 +27,12 @@ describe DuplexStreamAdapter do
 
     context "when stream is not ready to be read" do
       before do
-        @adapter.instance_variable_set("@readable_streams", [@stream])
         @stream = dont_allow!.sysread(1) {[?X.to_i]}.subject
+        @readable_streams = []
       end
 
       it "does nothing" do
-        @adapter.read_if_ready(@stream, @buffer)
+        @adapter.read_if_ready(@readable_streams, @stream, @buffer)
         @buffer == []
       end
     end
