@@ -20,7 +20,7 @@ describe DuplexStreamAdapter do
 
       it "should read a character from the stream and push it onto the buffer" do
         @adapter.read_if_ready(@stream, @buffer)
-        @buffer.first.should == "X"
+        @buffer.first.should == ?X
       end
 
     end

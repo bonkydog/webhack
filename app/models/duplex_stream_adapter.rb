@@ -26,7 +26,7 @@ class DuplexStreamAdapter
 
   def read_if_ready(source, buffer)
     if @readable_streams.include?(source)
-      coming_up_character = source.sysread(1)[0].chr
+      coming_up_character = source.sysread(1)[0]
       logger.debug "coming_up_character=#{coming_up_character}"
       buffer.push( coming_up_character)
     end
@@ -37,7 +37,7 @@ class DuplexStreamAdapter
     return unless @writable_streams.include?(sink)
     going_up_character = buffer.shift
     logger.debug "going_up_character=#{going_up_character}"
-    sink.syswrite( going_up_character)
+    sink.syswrite( going_up_character.chr)
   end
 
   def select_readable (coming_down, coming_up)
