@@ -47,6 +47,9 @@ class DuplexStreamAdapter
     logger.debug "incoming_character=#{incoming_character}"
     buffer.push(incoming_character)
     source.ready = false
+  rescue EOFError
+    logger.debug "reached end of file"
+    @eof = true
   end
 
   def write_if_ready(sink, buffer)
@@ -75,24 +78,24 @@ class DuplexStreamAdapter
     upward_buffer = []
     downward_buffer = []
 
+    @eof = false
     i = 0
     while true
       begin
         i += 1
         logger.debug "loop #{i}"
 
-        readable_streams = select_readable
+        select_readable
 
         read_if_ready(@coming_up, upward_buffer)
         read_if_ready(@coming_down, downward_buffer)
 
-        writable_streams = select_writable
+        select_writable
 
         write_if_ready(@going_up, upward_buffer)
         write_if_ready(@going_down, downward_buffer)
 
-      rescue EOFError => e
-        logger.debug "Ignoring EOF: #{e.inspect}"
+        return if @eof
       end
 
     end
