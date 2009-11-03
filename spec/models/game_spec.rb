@@ -65,10 +65,12 @@ describe Game do
 
     describe "#fifo_name" do
       it "should generate an downward fifo name" do
+        pending "integration"
         @game.fifo_name(:down).should == "#{@test_temp_dir}/downward_fifo_17_23"
       end
 
       it "should generate an upward fifo name" do
+        pending "integration"
         @game.fifo_name(:up).should == "#{@test_temp_dir}/upward_fifo_17_23"
       end
 

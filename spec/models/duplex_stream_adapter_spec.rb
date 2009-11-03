@@ -2,35 +2,20 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe DuplexStreamAdapter do
 
+  include Multiplex
+
   before do
-    @coming_down = Object.new
-    @coming_up = Object.new
-    @going_down = Object.new
-    @going_up = Object.new
+    @coming_down = FakeFile.new
+    @coming_up = FakeFile.new
+    @going_down = FakeFile.new
+    @going_up = FakeFile.new
     [@coming_down, @coming_up, @going_down, @going_up].each {|s| stub(s).sync=(anything)}
     @adapter = DuplexStreamAdapter.new(@coming_down, @coming_up, @going_down, @going_up)
   end
 
-  describe "#add_ready_attribute" do
-    before do
-      @stream = Object.new
-      @adapter.add_ready_attribute_to @stream
-    end
-
-    it "should add a ready attribute to an object" do
-      @stream.ready = true
-      @stream.should be_ready
-    end
-
-    it "should not add a ready attribute to the object's class" do
-      Object.new.should_not respond_to(:ready)
-    end
-  end
-
   describe "io" do
     before do
-      @stream = Object.new
-      @adapter.add_ready_attribute_to(@stream)
+      @stream = FakeFile.new
       stub(@stream).sysread(1) {[?X.to_i]}.subject
       stub(@stream).syswrite
 
@@ -162,7 +147,7 @@ describe DuplexStreamAdapter do
 
       context "when a stream is ready" do
         before do
-          stub(IO).select([@coming_up, @coming_down], nil, nil, 10) {[[@coming_up], [], []]} # timeout should be 10sec
+          stub(IO).select([@coming_up, @coming_down], nil, nil, 1) {[[@coming_up], [], []]} # timeout should be 1 second
           @adapter.select_readable([@coming_up, @coming_down])
         end
 
@@ -177,7 +162,7 @@ describe DuplexStreamAdapter do
 
       context "when no stream is ready" do
         before do
-          stub(IO).select([@coming_up, @coming_down], nil, nil, 10) {nil} # timeout should be 10 seconds
+          stub(IO).select([@coming_up, @coming_down], nil, nil, 1) {nil} # timeout should be 1 second
           @adapter.select_readable([@coming_up, @coming_down])
         end
 
@@ -232,7 +217,7 @@ describe DuplexStreamAdapter do
       upward_cursor = 0
       downward_cursor = 0
 
-      stub(IO).select([@coming_up, @coming_down], nil, nil, 10) do
+      stub(IO).select([@coming_up, @coming_down], nil, nil, 1) do
         [[@coming_up, @coming_down], [], []]
       end
 

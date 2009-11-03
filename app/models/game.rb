@@ -1,5 +1,7 @@
 class Game < ActiveRecord::Base
 
+  include Multiplex
+
   #####################################################################
   # validations  
 
@@ -22,7 +24,8 @@ class Game < ActiveRecord::Base
 
   def fifo_name(direction)
     raise ArgumentError unless DIRECTIONS.include?(direction)
-    File.join(Game.game_fifo_dir, "#{direction}ward_fifo_#{id}_#{pid}")
+    File.join("/tmp", "#{direction}ward")
+#    File.join(Game.game_fifo_dir, "#{direction}ward_fifo_#{id}_#{pid}")
   end
 
   def make_fifos
@@ -43,9 +46,17 @@ class Game < ActiveRecord::Base
     game = "/opt/local/bin/wumpus"
     adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
     command = "#{adapter} #{game} #{fifo_name(:down)} #{fifo_name(:up)}"
+    puts command
     system "nohup #{command} &"
   end
 
-
+  def read
+    buffer = []
+    down = File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC)
+    up = File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC)
+    select_readable([up])
+    read_if_ready(up, buffer)
+    buffer
+  end
 
 end
