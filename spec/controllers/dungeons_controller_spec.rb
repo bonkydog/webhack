@@ -16,7 +16,7 @@ describe DungeonsController do
 
   describe "actions" do
     before do
-      @game = Factory(:game)
+      @game = Factory(:game, :transcript => nil)
     end
 
     describe "#edit" do
