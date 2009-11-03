@@ -78,7 +78,7 @@ class Game < ActiveRecord::Base
 #
 #    while true
 #      select_readable([up])
-#      output = read_all_if_ready(up)
+#      output = read_string_if_ready(up)
 #      break if output.nil?
 #      incoming_buffer += output
 #    end

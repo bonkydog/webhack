@@ -14,12 +14,14 @@ describe Multiplex do
     @going_up = FakeFile.new
     [@coming_down, @coming_up, @going_down, @going_up].each {|s| stub(s).sync=(anything)}
     @adapter = Adapter.new
+    @adapter.max_buffer_size = 4
   end
 
   describe "io" do
     before do
       @stream = FakeFile.new
       stub(@stream).sysread(1) {[?X.to_i]}.subject
+      stub(@stream).sysread(@adapter.max_buffer_size) {"Xyzzy"}.subject
       stub(@stream).syswrite
 
       @buffer = []
@@ -54,7 +56,6 @@ describe Multiplex do
         context "when buffer is full" do
           before do
             @buffer = [?f, ?u, ?l, ?l]
-            @adapter.max_buffer_size = 4
             @adapter.read_if_ready(@stream, @buffer)
           end
 
@@ -83,6 +84,46 @@ describe Multiplex do
         end
       end
     end
+
+    describe "#read_string_if_ready" do
+
+      context "when stream is ready to be read" do
+        before do
+          @stream.ready = true
+          @result = @adapter.read_string_if_ready(@stream)
+        end
+
+        it "should try to read a bunch of characters from the stream" do
+          @stream.should have_received.sysread(@adapter.max_buffer_size)
+        end
+
+        it "should return the read characters as a string" do
+          @result.should == "Xyzzy"
+        end
+
+        it "should mark the stream unready" do
+          @stream.should_not be_ready
+        end
+      end
+
+
+      context "when stream is not ready to be read" do
+        before do
+          @stream.ready = false
+          @result = @adapter.read_string_if_ready(@stream)
+        end
+
+        it "should not attempt to read from the stream" do
+          @stream.should_not have_received.sysread(anything)
+        end
+
+        it "should return nil" do
+          @result.should be_nil
+        end
+      end
+
+    end
+
 
     describe "#write_if_ready" do
 
@@ -210,5 +251,4 @@ describe Multiplex do
   end
 
 
-  
 end

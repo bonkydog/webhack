@@ -49,16 +49,15 @@ module Multiplex
     sink.ready = false
   end
 
-  # SPIKE
-#  def read_all_if_ready(source)
-#    return unless source.ready?
-#    source.sysread(max_buffer_size)
-#  rescue EOFError
-#    logger.debug "reached end of file"
-#    @eof = true
-#  ensure
-#    source.ready = false
-#  end
+  def read_string_if_ready (source)
+    return unless source.ready?
+    source.sysread(max_buffer_size)
+  rescue EOFError
+    logger.debug "reached end of file"
+    @eof = true
+  ensure
+    source.ready = false
+  end
 
   def select_readable(streams)
     select_result = IO.select(streams, nil, nil, SELECT_READABLE_TIMEOUT_SECONDS)
