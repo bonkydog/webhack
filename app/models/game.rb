@@ -40,6 +40,7 @@ class Game < ActiveRecord::Base
     end
   end
 
+  # SPIKE
   def start
     make_fifos
 
@@ -47,15 +48,22 @@ class Game < ActiveRecord::Base
     adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
     command = "#{adapter} #{game} #{fifo_name(:down)} #{fifo_name(:up)}"
     puts command
-    system "nohup #{command} &"
+    self.pid = fork do
+      exec "nohup #{command} &" # this is a crap way to do this.
+    end 
   end
 
+  # SPIKE
   def read
-    buffer = []
-    down = File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC)
+    buffer = ""
+    File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC) # gotta open this or the wumpus stays asleep.
     up = File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC)
-    select_readable([up])
-    read_if_ready(up, buffer)
+    while true
+      select_readable([up])
+      output = read_all_if_ready(up)
+      break if output.nil?
+      buffer += output
+    end
     buffer
   end
 

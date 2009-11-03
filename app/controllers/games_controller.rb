@@ -8,6 +8,7 @@ class GamesController < ApplicationController
   # GET /games/1
   def show
     @game = Game.find(params[:id])
+    @output = @game.read # SPIKE
   end
   
   # GET /games/new
@@ -23,6 +24,7 @@ class GamesController < ApplicationController
   # POST /games
   def create
     @game = Game.new(params[:game])
+    @game.start # SPIKE
     if @game.save
       flash[:notice] = 'Game was successfully created.'
       redirect_to :action => "index"
