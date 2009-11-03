@@ -54,17 +54,31 @@ class Game < ActiveRecord::Base
   end
 
   # SPIKE
-  def read
-    buffer = ""
-    File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC) # gotta open this or the wumpus stays asleep.
+  def move(input)
+    incoming_buffer = ""
+    outgoing_buffer = input.bytes.to_a
+
+    down = File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC) # gotta open this or the wumpus stays asleep.
     up = File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC)
+    
+    outgoing_buffer.each do |c|
+      while !IO.select(nil, [down], nil, 10)
+        puts "whuuut?"
+      end
+      down.syswrite(c.chr)
+    end
+    sleep 0.1
+
     while true
       select_readable([up])
       output = read_all_if_ready(up)
       break if output.nil?
-      buffer += output
+      incoming_buffer += output
     end
-    buffer
+
+
+
+    incoming_buffer
   end
 
 end

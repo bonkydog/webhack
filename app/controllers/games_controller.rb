@@ -8,7 +8,6 @@ class GamesController < ApplicationController
   # GET /games/1
   def show
     @game = Game.find(params[:id])
-    @output = @game.read # SPIKE
   end
   
   # GET /games/new
@@ -27,7 +26,7 @@ class GamesController < ApplicationController
     @game.start # SPIKE
     if @game.save
       flash[:notice] = 'Game was successfully created.'
-      redirect_to :action => "index"
+      redirect_to :action => "edit", :id => @game.id
     else
       render :action => "new"
     end
@@ -36,9 +35,12 @@ class GamesController < ApplicationController
   # PUT /games/1
   def update
     @game = Game.find(params[:id])
+    move = params[:move]
+    @game.transcript ||= ""
+    @game.transcript += @game.move(move + "\n")
     if @game.update_attributes(params[:game])
       flash[:notice] = 'Game was successfully updated.'
-      redirect_to :action => "index"
+      redirect_to :action => "edit", :id => @game.id
     else
       render :action => "edit"
     end
