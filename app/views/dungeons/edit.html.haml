@@ -1,0 +1,7 @@
+= @game.name
+%pre
+  = @game.transcript
+
+- form_tag(game_dungeon_path(@game), :method => "put") do
+  = text_field_tag :move
+  = submit_tag

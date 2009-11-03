@@ -40,7 +40,7 @@ class DuplexStreamAdapter
         write_if_ready(@going_up, upward_buffer)
         write_if_ready(@going_down, downward_buffer)
 
-        return if @eof
+        # return if @eof
       end
 
     end

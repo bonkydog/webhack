@@ -1,5 +1,9 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
+module Pty
+  class ChildExited < Exception; end
+end
+
 describe DuplexStreamAdapter do
 
   include Multiplex
@@ -226,7 +230,7 @@ describe DuplexStreamAdapter do
       end
 
       stub(@coming_down).sysread(1) do
-        raise EOFError unless downward_cursor < downward_transmission.size
+        raise Pty::ChildExited unless downward_cursor < downward_transmission.size # otherwise it will run forever.
         x = returning downward_transmission[downward_cursor] do
           downward_cursor += 1
         end
@@ -234,7 +238,7 @@ describe DuplexStreamAdapter do
       end
 
       stub(@coming_up).sysread(1) do
-        raise EOFError unless upward_cursor < upward_transmission.size
+        raise Pty::ChildExited unless downward_cursor < downward_transmission.size # otherwise it will run forever.
         x = returning upward_transmission[upward_cursor] do
           upward_cursor += 1
         end
@@ -250,7 +254,7 @@ describe DuplexStreamAdapter do
         upward_receipt << x
       end
 
-      @adapter.adapt
+      lambda{ @adapter.adapt }.should raise_error(Pty::ChildExited)
 
       downward_receipt.should == downward_transmission.map(&:chr)
     end

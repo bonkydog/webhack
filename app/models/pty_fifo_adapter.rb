@@ -30,7 +30,7 @@ class PtyFifoAdapter
   cattr_accessor :logger
   self.logger = Logger.new(STDERR)
   self.logger.level = $DEBUG ? Logger::DEBUG : Logger::INFO
- 
+
 
   def initialize(command, downward_fifo_path, upward_fifo_path)
     @command = command
