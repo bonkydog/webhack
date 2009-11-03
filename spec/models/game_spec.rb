@@ -48,6 +48,14 @@ describe Game do
 
   end
 
+  describe "mass assignment" do
+
+    it "should not assign pid" do
+      should_not allow_mass_assignment_of(:pid)
+    end
+
+  end
+
   describe "game handing" do
 
     before do

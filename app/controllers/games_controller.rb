@@ -23,8 +23,7 @@ class GamesController < ApplicationController
   # POST /games
   def create
     @game = Game.new(params[:game])
-    # SPIKE
-    # @game.start
+    @game.start
     if @game.save
       flash[:notice] = 'Game was successfully created.'
       redirect_to :action => "index"

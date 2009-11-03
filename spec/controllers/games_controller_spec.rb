@@ -6,19 +6,18 @@ describe GamesController do
 
   describe "actions" do
     before do
-      @resource_class = Game
-      @resource = Factory(:game)
-      @other_resource= Factory(:game)
+      @game = Factory(:game)
+      @other_game= Factory(:game)
       @good_attributes = HashWithIndifferentAccess.new(Factory.attributes_for(:game))
       @bad_attributes = HashWithIndifferentAccess.new(Factory.attributes_for(:game, :name => ""))
-      @resource_count_before = Game.count
+      @game_count_before = Game.count
     end
 
 
     class Hash
       def without_automatic_fields
         copy = self.dup
-        [:id, :created_at, :updated_at].each { |key| copy.delete(key); copy.delete(key.to_s) }
+        [:id, :created_at, :updated_at, :pid].each { |key| copy.delete(key); copy.delete(key.to_s) }
         copy
       end
     end
@@ -26,47 +25,56 @@ describe GamesController do
 
     describe "#index" do
       before do
-        it "should fetch and assign all resources for listing" do
+        it "should fetch and assign all games for listing" do
           get :index
-          assigns(@resource_class.to_s.underscore.pluralize.to_sym).should =~ [@resource, @other_resource]
+          assigns(:games).should =~ [@game, @other_game]
         end
       end
     end
 
     describe "#show" do
-      it "should fetch and assign the resource for display" do
-        get :show, :id => @resource.id
-        assigns(@resource_class.to_s.underscore.to_sym).should == @resource
+      it "should fetch and assign the game for display" do
+        get :show, :id => @game.id
+        assigns(:game).should == @game
       end
     end
 
 
     describe "#new" do
-      it "should fetch and assign a new resource to fill in" do
+      it "should fetch and assign a new game to fill in" do
         get :new
-        assigns(@resource_class.to_s.underscore.to_sym).should be_a(@resource_class)
-        assigns(@resource_class.to_s.underscore.to_sym).should be_new_record
+        assigns(:game).should be_a(Game)
+        assigns(:game).should be_new_record
       end
     end
 
     describe "#edit" do
-      it "should fetch and assign the resource to edit" do
-        get :edit, :id => @resource.id
-        assigns(@resource_class.to_s.underscore.to_sym).should == @resource
+      it "should fetch and assign the game to edit" do
+        get :edit, :id => @game.id
+        assigns(:game).should == @game
       end
     end
 
 
     describe "#create" do
-      context "with valid resource" do
-        before do
-          post :create, @resource_class.to_s.underscore.to_sym => @good_attributes
+      before do
+        stub.proxy(Game).new do |game|
+          stub(game).start do
+            puts "pretending to start game..."
+            game.pid = 23
+          end
         end
-        it "should create a resource" do
-          @resource_class.count.should == @resource_count_before + 1
+      end
+
+      context "with valid game" do
+        before do
+          post :create, :game => @good_attributes
+        end
+        it "should create a game" do
+          Game.count.should == @game_count_before + 1
         end
 
-        it "should redirect to the resources index" do
+        it "should redirect to the games index" do
           response.should redirect_to(:action => "index")
         end
 
@@ -75,18 +83,18 @@ describe GamesController do
         end
       end
 
-      context "with invalid resource" do
+      context "with invalid game" do
         before do
-          post :create, @resource_class.to_s.underscore.to_sym => @bad_attributes
+          post :create, :game => @bad_attributes
         end
 
-        it "should not create a resource" do
-          @resource_class.count.should == @resource_count_before
+        it "should not create a game" do
+          Game.count.should == @game_count_before
         end
 
-        it "should assign resource for correction" do
-          assigns(@resource_class.to_s.underscore.to_sym).should be_a(@resource_class)
-          assigns(@resource_class.to_s.underscore.to_sym).should be_new_record
+        it "should assign game for correction" do
+          assigns(:game).should be_a(Game)
+          assigns(:game).should be_new_record
         end
 
         it "should render edit" do
@@ -99,16 +107,16 @@ describe GamesController do
 
 
     describe "#update" do
-      context "with valid resource" do
+      context "with valid game" do
         before do
-          put :update, :id => @resource.id, @resource_class.to_s.underscore.to_sym => @good_attributes
+          put :update, :id => @game.id, :game => @good_attributes
         end
 
         it "should not update the record" do
-          @resource.reload.attributes.without_automatic_fields.should == @good_attributes
+          @game.reload.attributes.without_automatic_fields.should == @good_attributes.without_automatic_fields
         end
 
-        it "should redirect to the resources index" do
+        it "should redirect to the games index" do
           response.should redirect_to(:action => "index")
         end
 
@@ -117,17 +125,17 @@ describe GamesController do
         end
       end
 
-      context "with invalid resource" do
+      context "with invalid game" do
         before do
-          put :update, :id => @resource.id, @resource_class.to_s.underscore.to_sym => @bad_attributes
+          put :update, :id => @game.id, :game => @bad_attributes
         end
 
         it "should not update the record" do
-          @resource.reload.attributes.without_automatic_fields.should_not == @bad_attributes
+          @game.reload.attributes.without_automatic_fields.should_not == @bad_attributes.without_automatic_fields
         end
 
-        it "should assign resource for correction" do
-          assigns(@resource_class.to_s.underscore.to_sym).should == @resource
+        it "should assign game for correction" do
+          assigns(:game).should == @game
         end
 
         it "should render edit" do
@@ -138,14 +146,14 @@ describe GamesController do
 
     describe "#destroy" do
       before do
-        delete :destroy, :id => @resource.id
+        delete :destroy, :id => @game.id
       end
 
-      it "should delete the resource" do
-        @resource_class.find_by_id(@resource.id).should be_nil
+      it "should delete the game" do
+        Game.find_by_id(@game.id).should be_nil
       end
 
-      it "should redirect to to resources index" do
+      it "should redirect to to games index" do
         response.should redirect_to(:action => "index")
       end
     end

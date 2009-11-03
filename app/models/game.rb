@@ -9,6 +9,8 @@ class Game < ActiveRecord::Base
   validates_numericality_of :pid
   validates_uniqueness_of :pid
 
+  attr_protected :pid
+
   #####################################################################
   # fifo management
 
