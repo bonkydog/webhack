@@ -1,13 +1,9 @@
 require "rubygems"
-require "pty"
 require "logger"
 require "activesupport"
-require "pp"
 
 class DuplexStreamAdapter
-  
-  SELECT_READABLE_TIMEOUT_SECONDS = 10
-  SELECT_WRITABLE_TIMEOUT_SECONDS = 0
+  include Multiplex
 
   cattr_accessor :logger
   self.logger = Logger.new(STDERR)
@@ -40,39 +36,6 @@ class DuplexStreamAdapter
     end
   end
 
-  def read_if_ready(source, buffer)
-    return unless buffer.size < max_buffer_size
-    return unless source.ready?
-    incoming_character = source.sysread(1)[0]
-    logger.debug "incoming_character=#{incoming_character}"
-    buffer.push(incoming_character)
-    source.ready = false
-  rescue EOFError
-    logger.debug "reached end of file"
-    @eof = true
-  end
-
-  def write_if_ready(sink, buffer)
-    return if buffer.empty? 
-    return unless sink.ready?
-    outgoing_character = buffer.shift
-    logger.debug "outgoing_character=#{outgoing_character}"
-    sink.syswrite( outgoing_character.chr)
-    sink.ready = false
-  end
-
-  def select_readable
-    select_result = IO.select(@incoming_streams, nil, nil, SELECT_READABLE_TIMEOUT_SECONDS)
-    readable_streams = select_result ? select_result[0] : []
-    @incoming_streams.each {|s| s.ready = readable_streams.include?(s)}
-  end
-
-  def select_writable
-    select_result = IO.select(nil, @outgoing_streams, nil, SELECT_WRITABLE_TIMEOUT_SECONDS)
-    writable_streams = select_result ? select_result[1] : []
-    @outgoing_streams.each {|s| s.ready = writable_streams.include?(s)}
-  end
-
   def adapt
     @coming_up.sync = @going_down.sync = true
     upward_buffer = []
@@ -85,12 +48,12 @@ class DuplexStreamAdapter
         i += 1
         logger.debug "loop #{i}"
 
-        select_readable
+        select_readable(@incoming_streams)
 
         read_if_ready(@coming_up, upward_buffer)
         read_if_ready(@coming_down, downward_buffer)
 
-        select_writable
+        select_writable(@outgoing_streams)
 
         write_if_ready(@going_up, upward_buffer)
         write_if_ready(@going_down, downward_buffer)

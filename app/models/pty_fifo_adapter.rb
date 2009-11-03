@@ -25,10 +25,6 @@ require File.join(File.dirname(__FILE__), "duplex_stream_adapter")
 # IO variables are named imagining the controlling process on top, this wrapper in the middle, and the
 # controlled process on the bottom.
 
-
-
-
-
 class PtyFifoAdapter
 
   cattr_accessor :logger

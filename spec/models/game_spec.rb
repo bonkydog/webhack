@@ -93,7 +93,6 @@ describe Game do
       end
     end
 
-
     describe "#unlink_fifos" do
       it "should unlink the upward and downward fifos" do
         @game.make_fifos

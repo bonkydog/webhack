@@ -37,6 +37,15 @@ class Game < ActiveRecord::Base
     end
   end
 
+  def start
+    make_fifos
+
+    game = "/opt/local/bin/wumpus"
+    adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
+    command = "#{adapter} #{game} #{fifo_name(:down)} #{fifo_name(:up)}"
+    system "nohup #{command} &"
+  end
+
 
 
 end

@@ -163,7 +163,7 @@ describe DuplexStreamAdapter do
       context "when a stream is ready" do
         before do
           stub(IO).select([@coming_up, @coming_down], nil, nil, 10) {[[@coming_up], [], []]} # timeout should be 10sec
-          @adapter.select_readable
+          @adapter.select_readable([@coming_up, @coming_down])
         end
 
         it "should return mark the readable streams ready" do
@@ -178,7 +178,7 @@ describe DuplexStreamAdapter do
       context "when no stream is ready" do
         before do
           stub(IO).select([@coming_up, @coming_down], nil, nil, 10) {nil} # timeout should be 10 seconds
-          @adapter.select_readable
+          @adapter.select_readable([@coming_up, @coming_down])
         end
 
         it "should return not mark the unreadable streams ready" do
@@ -194,7 +194,7 @@ describe DuplexStreamAdapter do
       context "when a stream is ready" do
         before do
           stub(IO).select(nil, [@going_up, @going_down], nil, 0) {[[], [@going_up], []]} # timeout should be 0 seconds
-          @adapter.select_writable
+          @adapter.select_writable([@going_up, @going_down])
         end
 
         it "should return mark the writable streams ready" do
@@ -209,7 +209,7 @@ describe DuplexStreamAdapter do
       context "when no stream is ready" do
         before do
           stub(IO).select(nil, [@going_up, @going_down], nil, 0) {nil} # timeout should be 0 seconds
-          @adapter.select_writable
+          @adapter.select_writable([@going_up, @going_down])
         end
 
         it "should return not mark the unwritable streams ready" do
