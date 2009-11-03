@@ -44,45 +44,46 @@ class Game < ActiveRecord::Base
 
   # SPIKE
   def start
-#    make_fifos
-#
+    make_fifos
+
 #    game = "/opt/local/bin/wumpus"
-#    adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
-#    command = "#{adapter} #{game} #{fifo_name(:down)} #{fifo_name(:up)}"
-#    puts command
-#    self.pid = fork do
-#      exec "nohup #{command} &" # this is a crap way to do this.
-#    end
+    game = "/opt/local/bin/nethack"
+    adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
+    command = "#{adapter} #{game} #{fifo_name(:down)} #{fifo_name(:up)}"
+    puts command
+    self.pid = fork do
+      exec "nohup #{command} &" # this is a crap way to do this.
+    end
+    sleep 0.5
   end
+
 
   # SPIKE
   def move(input)
-#    outgoing_buffer = input.bytes.to_a
-#
-#    down = File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC) # gotta open this or the wumpus stays asleep.
-#    up = File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC)
-#
-#    outgoing_buffer.each do |c|
-#      while !IO.select(nil, [down], nil, 10)
-#        puts "whuuut?"
-#      end
-#      down.syswrite(c.chr)
-#    end
+    outgoing_buffer = input.bytes.to_a
+    File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |down|
+      File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
+        outgoing_buffer.each do |c|
+          while !IO.select(nil, [down], nil, 3)
+            puts "whuuut?"
+          end
+          down.syswrite(c.chr)
+        end
+      end
+    end
   end
 
   def look
-#    incoming_buffer = ""
-#
-#    down = File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC) # gotta open this or the wumpus stays asleep.
-#    up = File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC)
-#
-#    while true
-#      select_readable([up])
-#      output = read_string_if_ready(up)
-#      break if output.nil?
-#      incoming_buffer += output
-#    end
-#    incoming_buffer
+    buffer = ""
+
+    File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |down|
+      File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
+        while IO.select([up], nil, nil, 3)
+          buffer += up.sysread(max_buffer_size)
+        end
+        buffer
+      end
+    end
   end
 
 

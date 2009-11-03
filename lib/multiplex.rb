@@ -55,6 +55,7 @@ module Multiplex
   rescue EOFError
     logger.debug "reached end of file"
     @eof = true
+    ""
   ensure
     source.ready = false
   end
