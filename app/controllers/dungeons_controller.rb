@@ -30,7 +30,7 @@ class DungeonsController < ActionController::Base
     @game.save!
 
     render :juggernaut do |page|
-      page.replace_html 'transcript', @game.transcript
+      page.insert_html :bottom, 'transcript', output
     end
 
     render :nothing => true
