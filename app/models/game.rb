@@ -59,37 +59,8 @@ class Game < ActiveRecord::Base
 
 
   # SPIKE
-  def move(input)
-    outgoing_buffer = input.bytes.to_a
-    File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |down|
-      File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
-        outgoing_buffer.each do |c|
-          while !IO.select(nil, [down], nil, 3)
-            puts "whuuut?"
-          end
-          down.syswrite(c.chr)
-        end
-      end
-    end
-  end
-
-  def look
-    buffer = "(no response)"
-
-    File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |down|
-      File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
-        while IO.select([up], nil, nil, 3)
-          buffer += up.sysread(max_buffer_size)
-        end
-        return buffer
-      end
-    end
-  end
-
-
-  # SPIKE
   def move_and_look(input)
-    incoming_buffer = "response:"
+    incoming_buffer = ""
     outgoing_buffer = input.bytes.to_a
     File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |down|
       File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
