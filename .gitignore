@@ -7,7 +7,7 @@ Thumbs.db
 .idea/**/*
 .idea/*
 
-#ignore Mac OS X droppings
+# ignore Mac OS X droppings
 .DS_Store
 
 # ignore rails droppings 
@@ -16,3 +16,6 @@ tmp/**/*
 doc/api
 doc/app
 db/*.sqlite*
+
+# ignore (sass-generated) css
+public/stylesheets/*.css
