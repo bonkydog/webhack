@@ -61,7 +61,7 @@ describe GamesController do
         stub.proxy(Game).new do |game|
           stub(game).start do
             puts "pretending to start game..."
-            game.pid = 23
+            game.pid = Factory.next(:pid)
           end
         end
       end
@@ -70,16 +70,20 @@ describe GamesController do
         before do
           post :create, :game => @good_attributes
         end
+
         it "should create a game" do
           Game.count.should == @game_count_before + 1
         end
 
-        it "should redirect to the games index" do
-          response.should redirect_to(:action => "index")
+        it "should redirect to show the new game" do
+          response.should redirect_to(game_url(assigns[:game].id))
         end
 
         it "should flash a notice" do
-          flash[:notice].should_not be_nil
+          puts assigns[:game].errors.full_messages
+          puts assigns[:game].pid
+          pp Game.find_by_pid(assigns[:game].pid)
+          flash[:notice].should =~ /created/
         end
       end
 
