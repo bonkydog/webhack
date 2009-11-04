@@ -26,7 +26,7 @@ class GamesController < ApplicationController
     @game.start
     if @game.save
       flash[:notice] = 'Game was successfully created.'
-      redirect_to edit_game_dungeon_path(@game.id)
+      redirect_to :action => "show", :id => @game.id
     else
       render :action => "new"
     end

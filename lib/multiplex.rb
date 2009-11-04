@@ -47,6 +47,8 @@ module Multiplex
     logger.debug "outgoing_character=#{outgoing_character}"
     sink.syswrite( outgoing_character.chr)
     sink.ready = false
+  rescue Errno::EPIPE
+    logger.debug "reached end of pipe"
   end
 
   def read_string_if_ready (source)

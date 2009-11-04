@@ -1,3 +1,9 @@
 = @game.name
-%pre
-  = @output
+%pre#transcript
+  = @game.transcript
+
+
+- form_remote_tag(:url => game_dungeon_path(@game), :complete => "$('move').value = ''",  :method => "put") do
+  = text_field_tag :move, "", :class => "focus"
+  = submit_tag "Move", :class => "inviso"
+  

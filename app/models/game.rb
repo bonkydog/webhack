@@ -46,8 +46,8 @@ class Game < ActiveRecord::Base
   def start
     make_fifos
 
-#    game = "/opt/local/bin/wumpus"
-    game = "/opt/local/bin/nethack"
+    game = "/opt/local/bin/wumpus"
+#    game = "/opt/local/bin/nethack"
     adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
     command = "#{adapter} #{game} #{fifo_name(:down)} #{fifo_name(:up)}"
     puts command
@@ -74,16 +74,39 @@ class Game < ActiveRecord::Base
   end
 
   def look
-    buffer = ""
+    buffer = "(no response)"
 
     File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |down|
       File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
         while IO.select([up], nil, nil, 3)
           buffer += up.sysread(max_buffer_size)
         end
-        buffer
+        return buffer
       end
     end
+  end
+
+
+  # SPIKE
+  def move_and_look(input)
+    incoming_buffer = "response:"
+    outgoing_buffer = input.bytes.to_a
+    File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |down|
+      File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
+        outgoing_buffer.each do |c|
+          while !IO.select(nil, [down], nil, 3)
+            puts "whuuut?"
+          end
+          down.syswrite(c.chr)
+        end
+
+        while IO.select([up], nil, nil, 3)
+          incoming_buffer += up.sysread(max_buffer_size)
+          sleep 0.1
+        end
+      end
+    end
+    incoming_buffer
   end
 
 
