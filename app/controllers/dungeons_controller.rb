@@ -31,6 +31,7 @@ class DungeonsController < ActionController::Base
 
     render :juggernaut do |page|
       page.insert_html :bottom, 'transcript', output
+      page.visual_effect :scroll_to, "move" 
     end
 
     render :nothing => true
