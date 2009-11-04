@@ -70,3 +70,8 @@ shared_examples_for "a timestamped model" do
 end
 
 
+class String
+  def unindented
+    strip.gsub(/^\s+/,'')
+  end
+end
