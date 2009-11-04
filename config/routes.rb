@@ -1,5 +1,7 @@
 ActionController::Routing::Routes.draw do |map|
-  map.resources :games, :has_one => :dungeon
+  map.resources :games do |game|
+    game.resource :dungeon, :only => [:update]
+  end
   
 
   # The priority is based upon order of creation: first created -> highest priority.
