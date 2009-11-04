@@ -14,12 +14,11 @@ class DungeonsController < ActionController::Base
     @game.transcript += output
     @game.save!
 
-    render :juggernaut do |page|
+    render :update do |page|
       page.insert_html :bottom, 'transcript', output
       page.visual_effect :scroll_to, "move" 
     end
 
-    render :nothing => true
   end
 
 
