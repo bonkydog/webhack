@@ -8,15 +8,15 @@ class DungeonsController < ActionController::Base
     # move = "\n" if move == "" # for nethack
     move = "#{move}\n" # for wumpus
 
-    output = @game.move_and_look(move)
+    @output = @game.move_and_look(move)
 
     @game.transcript = "" if @game.transcript.blank?
-    @game.transcript += output
+    @game.transcript += @output
     @game.save!
 
-    render :update do |page|
-      page.insert_html :bottom, 'transcript', output
-      page.visual_effect :scroll_to, "move" 
+    respond_to do |format|
+      format.html { redirect_to @game }
+      format.js {} 
     end
 
   end

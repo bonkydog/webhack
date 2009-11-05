@@ -4,11 +4,7 @@
     %meta{'http-equiv' => 'Content-Type', :content => 'text/html'}
     %title webhack
     = stylesheet_link_tag 'webhack'
-
-    = javascript_include_tag 'prototype', 'scriptaculous'
-
-    = javascript_include_tag 'application'
-    
+    = javascript_include_tag 'jquery-1.3.2', 'jquery.scrollTo', 'application'
   %body
     .flash
       = flash[:notice]
