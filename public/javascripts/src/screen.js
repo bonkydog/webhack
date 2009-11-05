@@ -89,7 +89,10 @@ WEBHACK.screen = function (container_selector, my){
     }],
 
     // Erase in Line: Erase to Right
-    [/^\u001B]1K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td:lt(" + cursor.col + ")").html("")}]
+    [/^\u001B]1K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td:lt(" + cursor.col + ")").html("")}],
+
+    // Erase in Line: Erase All
+    [/^\u001B]2K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td").html("")}]
   ];
 
   var handleEscape = function(character) {

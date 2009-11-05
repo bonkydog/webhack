@@ -314,6 +314,23 @@ describe('screen', function () {
         });
       });
 
+
+      describe("Erase All: CSI 2 K", function () {
+        it("should clear line from the current column through the end (inclusive)", function() {
+          $("table.screen td").html("x");
+          screen.setCursor(12, 40);
+          screen.print(CSI + "2K");
+          expect($("table.screen tr:lt(11) td:contains(x)").size()).toEqual(11 * 80);
+          expect($("table.screen tr:gt(11) td:contains(x)").size()).toEqual((25 - 12) * 80);
+          expect($("table.screen tr:eq(11) td:contains(x)").size()).toEqual(0);
+          expect(screen.getCharacter(12, 40)).toEqual("");
+          expect(screen.getCharacter(12, 39)).toEqual("");
+          expect(screen.getCharacter(12, 41)).toEqual("");
+          expect(screen.getCharacter(11, 40)).toEqual("x");
+          expect(screen.getCharacter(13, 41)).toEqual("x");
+        });
+      });
+
     });
 
 
