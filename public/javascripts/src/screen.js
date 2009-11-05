@@ -31,11 +31,19 @@ WEBHACK.screen = function (container_selector, my){
     cursor.column = column;
   };
 
-  var putCharacter = function(character, row, column){
+  var findCell = function(row, column){
     var selector = "tr:eq(" + (row - 1) + ") td:eq(" + (column - 1) + ")";
-    var cell = table.contents(selector).slice(0,1);
-    cell.html(character);
+    return table.contents(selector).slice(0,1);
   };
+
+  var putCharacter = function(character, row, column){
+    findCell(row, column).html(character);
+  };
+
+  var getCharacter = function(row, column){
+    return findCell(row, column).html();
+  };
+
 
   my = my || {};
 
@@ -50,6 +58,7 @@ WEBHACK.screen = function (container_selector, my){
   self.getCursor = getCursor;
   self.setCursor = setCursor;
   self.putCharacter = putCharacter;
+  self.getCharacter = getCharacter;
 
   return self;
 };

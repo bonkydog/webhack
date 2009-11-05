@@ -50,9 +50,10 @@ describe('screen', function () {
     });
   });
 
-  describe("get", function () {
+  describe("getCharacter", function () {
     it("should get the character from the cell at the requested coordinates", function() {
-      
+      screen.putCharacter("@", 5, 19); // ansi is one-based.
+      expect(screen.getCharacter(5, 19)).toEqual("@");
     });
   });
 
