@@ -2,17 +2,14 @@ describe('screen', function () {
 
   var screen;
   beforeEach(function() {
-    screen = WEBHACK.screen();
+
+    $("#scratch").remove();
+    $("body").append($("<div>").attr("id", "scratch"));
+
+    screen = WEBHACK.screen("#scratch");
   });
 
-  describe("#buildScreen", function () {
-
-    beforeEach(function() {
-      $("#scratch").remove();
-      $("body").append($("<div>").attr("id", "scratch"))
-
-      screen.build("#scratch");
-    });
+  describe("construction", function () {
 
     it("should build a table", function() {
       expect($("table.screen").length).toEqual(1);
@@ -45,11 +42,26 @@ describe('screen', function () {
     });
   });
 
-  describe("writeToScreen", function () {
+  describe("putCharacter", function () {
+    it("should should put a character into the cell at the requested coordinates", function() {
+      screen.putCharacter("@", 12, 16); // ansi is one-based.
+      var cell = $("table.screen tr:eq(11) td:eq(15)"); // jquery selectors are zero-based.
+      expect(cell.html()).toEqual("@");
+    });
+  });
+
+  describe("get", function () {
+    it("should get the character from the cell at the requested coordinates", function() {
+      
+    });
+  });
+
+  describe("writeChraracter", function () {
     describe("when the argument is an ordinary character", function () {
-      it("should write the character into the current cell", function() {
+      it("should put the character in the current cell (pointed to by the cursor)", function() {
 
       });
+
       describe("when the cursor is not on the right or bottom edge", function () {
         it("should move the cursor one column to the right", function() {
 

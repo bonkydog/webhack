@@ -15,7 +15,7 @@ jQuery.fn.submitWithAjax = function() {
 $(document).ready(function() {
   $("form.ajax").submitWithAjax();
   $(".no-autocomplete").attr("autocomplete", "off");
-  $(".screen").buildScreen();
+  WEBHACK.screen("div.screen-container")
 })
 
 

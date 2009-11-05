@@ -1,12 +1,14 @@
-WEBHACK.screen = function (spec, my){
+WEBHACK.screen = function (container_selector, my){
 
   // private ####################################
 
-  var self, cursor = {row: 1, column: 1};
+  var self;
+  var cursor = {row: 1, column: 1};
+  var container = $(container_selector).slice(0,1);
+  var table;
 
-  var build = function(container_selector) {
-    var container = $(container_selector).slice(0,1);
-    var table = $("<table>").addClass("screen");
+  var build = function() {
+    table = $("<table>").addClass("screen");
     container.append(table);
     var column, row;
     for (column = 0; column < 25; ++column) {
@@ -18,6 +20,8 @@ WEBHACK.screen = function (spec, my){
     }
   };
 
+  build();
+
   var getCursor = function (){
     return {row: cursor.row, column: cursor.column};
   };
@@ -27,6 +31,11 @@ WEBHACK.screen = function (spec, my){
     cursor.column = column;
   };
 
+  var putCharacter = function(character, row, column){
+    var selector = "tr:eq(" + (row - 1) + ") td:eq(" + (column - 1) + ")";
+    var cell = table.contents(selector).slice(0,1);
+    cell.html(character);
+  };
 
   my = my || {};
 
@@ -40,6 +49,8 @@ WEBHACK.screen = function (spec, my){
   self.build = build;
   self.getCursor = getCursor;
   self.setCursor = setCursor;
+  self.putCharacter = putCharacter;
 
   return self;
 };
+
