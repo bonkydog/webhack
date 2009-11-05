@@ -20,7 +20,13 @@ WEBHACK.screen = function (spec, my){
 
   var getCursor = function (){
     return {row: cursor.row, column: cursor.column};
-  }
+  };
+
+  var setCursor = function(row, column){
+    cursor.row = row;
+    cursor.column = column;
+  };
+
 
   my = my || {};
 
@@ -33,7 +39,7 @@ WEBHACK.screen = function (spec, my){
 
   self.build = build;
   self.getCursor = getCursor;
-
+  self.setCursor = setCursor;
 
   return self;
 };

@@ -40,7 +40,8 @@ describe('screen', function () {
 
   describe("setCursor", function () {
     it("should move the cursor to the requested coordinates", function() {
-
+      screen.setCursor(17,23);
+      expect(screen.getCursor()).toEqual({row:17, column: 23});
     });
   });
 
