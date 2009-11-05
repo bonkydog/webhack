@@ -67,6 +67,11 @@ describe('screen', function () {
         screen.setCursor(17, 23);
         expect(screen.getCursor()).toEqual({row:17, col: 23});
       });
+      it("should understand numeric string coordinates", function() {
+        screen.setCursor("3", "4");
+        expect(screen.getCursor()).toEqual({row:3, col: 4});
+      });
+
     });
 
     describe("putCharacter", function () {
@@ -193,7 +198,7 @@ describe('screen', function () {
 
     var CSI = "\u001B]"; // ANSI Control Sequence Introducer
 
-    describe("Cursor Position (CUP): CSI row ; col H", function () {
+    describe("Cursor Position: CSI row ; col H", function () {
       it("should move the cursor to the requested position", function() {
         screen.print(CSI + "5;23H");
         expect(screen.getCursor().row).toEqual(5);
@@ -218,11 +223,20 @@ describe('screen', function () {
         screen.print("me");
         expect(screen.getCharacter(5, 23)).toEqual("m");
         expect(screen.getCharacter(5, 24)).toEqual("e");
+      });
+    });
+
+    describe("Erase all: CSI 2 J", function () {
+      it("should clear the screen", function() {
+        $("table.screen td").html("x");
+        expect($("table.screen td:contains(x)").size()).toEqual(25 * 80);
+        screen.print(CSI + "2J");
+        expect($("table.screen td:contains(x)").size()).toEqual(0);
+
 
       });
-
-
     });
+
   });
 
 });

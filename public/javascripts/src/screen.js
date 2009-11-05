@@ -42,9 +42,13 @@ WEBHACK.screen = function (container_selector, my){
     return {row: cursor.row, col: cursor.col};
   };
 
+  var numerify = function(string_or_number) {
+    return Object.isString(string_or_number) ? parseInt(string_or_number, 10) : string_or_number;
+  };
+
   var setCursor = function(row, col){
-    cursor.row = row;
-    cursor.col = col;
+    cursor.row = numerify(row);
+    cursor.col = numerify(col);
   };
 
   var findCell = function(row, col){
@@ -64,6 +68,15 @@ WEBHACK.screen = function (container_selector, my){
     return findCell(row, col).html();
   };
 
+  var clear = function(){
+    $("table.screen td").html("");
+  };
+
+  var ESCAPE_SEQUENCES = [
+    [/^\u001B](\d{1,2});(\d{1,2})H/, setCursor],
+    [/^\u001B]2J/, clear]
+  ];
+
   var handleEscape = function(character) {
     var swallow_character = false;
 
@@ -75,13 +88,17 @@ WEBHACK.screen = function (container_selector, my){
     if (escaping) {
       swallow_character = true;
       escapeBuffer += character;
-      var match = /^\u001B](\d{1,2});(\d{1,2})H/.exec(escapeBuffer);
-      if (match) {
-        var row = parseInt(match[1]);
-        var col = parseInt(match[2]);
-        setCursor(row, col);
-        escaping = false;
-      }
+      ESCAPE_SEQUENCES.each(function(mapping){
+        if (!escaping) return;
+        var regex = mapping[0];
+        var method = mapping[1];
+        var match = regex.exec(escapeBuffer);
+        if (match) {
+          var captured_groups = $A(match).slice(1);
+          method.apply(null, captured_groups);
+          escaping = false;
+        }
+      });
     }
 
     return swallow_character;
