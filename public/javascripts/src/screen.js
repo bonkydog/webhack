@@ -84,7 +84,12 @@ WEBHACK.screen = function (container_selector, my){
     [/^\u001B]2J/, function(){$("table.screen td").html("")}],
 
     // Erase in Line: Erase to Right
-    [/^\u001B]0K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td:gt(" + (cursor.col - 2) + ")").html("")}]
+    [/^\u001B]0?K/, function(){
+      $("table.screen tr:eq(" + (cursor.row - 1) + ") td:gt(" + (cursor.col - 2) + ")").html("")
+    }],
+
+    // Erase in Line: Erase to Right
+    [/^\u001B]1K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td:lt(" + cursor.col + ")").html("")}]
   ];
 
   var handleEscape = function(character) {
