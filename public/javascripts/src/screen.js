@@ -82,6 +82,9 @@ WEBHACK.screen = function (container_selector, my){
 
     // Erase in Display: Erase All
     [/^\u001B]2J/, function(){$("table.screen td").html("")}],
+
+    // Erase in Line: Erase to Right
+    [/^\u001B]0K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td:gt(" + (cursor.col - 2) + ")").html("")}]
   ];
 
   var handleEscape = function(character) {
