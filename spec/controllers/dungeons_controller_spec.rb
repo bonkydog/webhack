@@ -29,11 +29,7 @@ describe DungeonsController do
 
       it "should update the page via RJS" do
         response.should be_success
-        response.body.should == <<-JS.unindented
-          Element.insert("transcript", { bottom: "OK, you're east." });
-          new Effect.ScrollTo("move",{});
-        JS
-
+        response.should render_template(:update)
       end
 
     end

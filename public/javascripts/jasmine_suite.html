@@ -4,13 +4,15 @@
 <head>
   <title>Jasmine Test Runner</title>
 </head>
-<script type="text/javascript" src="../../lib/jasmine/lib/jasmine-0.10.0.js"></script>
-<script type="text/javascript" src="../../lib/jasmine/lib/TrivialReporter.js"></script>
-<script type="text/javascript" src="../../lib/jasmine/lib/consolex.js"></script>
-<link rel="stylesheet" type="text/css" href="../../lib/jasmine/lib/jasmine.css">
+<script type="text/javascript" src="./lib/jasmine/lib/jasmine-0.10.0.js"></script>
+<script type="text/javascript" src="./lib/jasmine/lib/TrivialReporter.js"></script>
+<script type="text/javascript" src="./lib/jasmine/lib/consolex.js"></script>
+<link rel="stylesheet" type="text/css" href="./lib/jasmine/lib/jasmine.css">
 
 <script type="text/javascript">
-  jasmine.include('spec/screen_spec.js', true);
+  jasmine.include('./lib/jquery-1.3.2.js', true);
+  jasmine.include('./src/screen.js', true);
+  jasmine.include('./spec/screen_spec.js', true);
 </script>
 
 <body>
@@ -21,7 +23,6 @@
   jasmineEnv.execute();
 </script>
 
+
 </body>
 </html>
-
-
