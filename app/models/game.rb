@@ -46,8 +46,8 @@ class Game < ActiveRecord::Base
   def start
     make_fifos
 
-    game = "/opt/local/bin/wumpus"
-#    game = "/opt/local/bin/nethack"
+#    game = "/opt/local/bin/wumpus"
+    game = "/opt/local/bin/nethack"
     adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
     command = "#{adapter} #{game} #{fifo_name(:down)} #{fifo_name(:up)}"
     puts command

@@ -5,8 +5,8 @@ class DungeonsController < ActionController::Base
 
     move = params[:move]
 
-    # move = "\n" if move == "" # for nethack
-    move = "#{move}\n" # for wumpus
+    move = "\n" if move == "" # for nethack
+    # move = "#{move}\n" # for wumpus
 
     @output = @game.move_and_look(move)
 

@@ -1,16 +1,39 @@
-(function($) {
+WEBHACK.screen = function (spec, my){
 
-  jQuery.fn.buildScreen = function() {
+  // private ####################################
+
+  var self, cursor = {row: 1, column: 1};
+
+  var build = function(container_selector) {
+    var container = $(container_selector).slice(0,1);
     var table = $("<table>").addClass("screen");
-    this.append(table);
-    var y, x;
-    for (y = 0; y < 25; ++y) {
-      var row = $("<tr>");
-      table.append(row);
-      for (x = 0; x < 80; ++x) {
-        row.append($("<td>"));
+    container.append(table);
+    var column, row;
+    for (column = 0; column < 25; ++column) {
+      var tr = $("<tr>");
+      table.append(tr);
+      for (row = 0; row < 80; ++row) {
+        tr.append($("<td>"));
       }
     }
   };
 
-})(jQuery);
+  var getCursor = function (){
+    return {row: cursor.row, column: cursor.column};
+  }
+
+  my = my || {};
+
+  // protected ##################################
+  // (none yet -- add like this: my.foo = "blah";
+
+
+  // interface ##################################
+  self = {};
+
+  self.build = build;
+  self.getCursor = getCursor;
+
+
+  return self;
+};

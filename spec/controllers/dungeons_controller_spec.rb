@@ -24,7 +24,7 @@ describe DungeonsController do
       end
 
       it "should relay the move to the game" do
-        @found_game.should have_received.move_and_look("go east\n")
+        @found_game.should have_received.move_and_look("go east")
       end
 
       it "should update the page via RJS" do
