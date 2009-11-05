@@ -68,13 +68,20 @@ WEBHACK.screen = function (container_selector, my){
     return findCell(row, col).html();
   };
 
-  var clear = function(){
-    $("table.screen td").html("");
-  };
 
   var ESCAPE_SEQUENCES = [
+
+    //Cursor Position
     [/^\u001B](\d{1,2});(\d{1,2})H/, setCursor],
-    [/^\u001B]2J/, clear]
+
+    // Erase in Display: Erase Below
+    [/^\u001B]0?J/, function(){$("table.screen tr:gt(" + (cursor.row - 2) + ") td").html("")}],
+
+    // Erase in Display: Erase Above
+    [/^\u001B]1J/, function(){$("table.screen tr:lt(" + cursor.row + ") td").html("")}],
+
+    // Erase in Display: Erase All
+    [/^\u001B]2J/, function(){$("table.screen td").html("")}],
   ];
 
   var handleEscape = function(character) {

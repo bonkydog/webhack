@@ -34,7 +34,7 @@ describe('screen', function () {
     describe("findCell", function () {
       it("should return a jQuery wrapped set containing the cell at the requested (ANSI) coordinates", function() {
         // Note: In ANSI escape codes, row 1, column 1 is the upper left corner of the screen.
-        var foundCell = screen.findCell(17,23);
+        var foundCell = screen.findCell(17, 23);
 
         expect(foundCell.size()).toEqual(1);
         expect(foundCell.attr).toBeDefined(); // expecting jQuery-nature
@@ -44,7 +44,14 @@ describe('screen', function () {
       });
 
       it("should throw an error when coordinates are out of bounds", function() {
-        [[0,0], [0,5], [5,0], [5,81], [26,5], [26,80]].each(function(coordinates){
+        [
+          [0,0],
+          [0,5],
+          [5,0],
+          [5,81],
+          [26,5],
+          [26,80]
+        ].each(function(coordinates) {
           var exception = undefined;
           try {
             screen.findCell(coordinates[0], coordinates[1]);
@@ -198,7 +205,7 @@ describe('screen', function () {
 
     var CSI = "\u001B]"; // ANSI Control Sequence Introducer
 
-    describe("Cursor Position: CSI row ; col H", function () {
+    describe("Cursor Position (CUP): CSI row ; col H", function () {
       it("should move the cursor to the requested position", function() {
         screen.print(CSI + "5;23H");
         expect(screen.getCursor().row).toEqual(5);
@@ -207,7 +214,7 @@ describe('screen', function () {
 
       it("should not print characters", function() {
         screen.putCharacter("!", 5, 23);
-        screen.setCursor(1,1);
+        screen.setCursor(1, 1);
         screen.print("fox");
         screen.print(CSI + "5;23H");
         expect(screen.getCursor().row).toEqual(5);
@@ -226,16 +233,55 @@ describe('screen', function () {
       });
     });
 
-    describe("Erase all: CSI 2 J", function () {
-      it("should clear the screen", function() {
-        $("table.screen td").html("x");
-        expect($("table.screen td:contains(x)").size()).toEqual(25 * 80);
-        screen.print(CSI + "2J");
-        expect($("table.screen td:contains(x)").size()).toEqual(0);
+    describe("Erase in Display (ED) CSI code K", function () {
 
+      describe("Erase Below: CSI 0 J", function () {
+        it("should clear the screen from the current through the bottom line (inclusive)", function() {
+          $("table.screen td").html("x");
+          screen.setCursor(12, 40);
+          screen.print(CSI + "0J");
+          expect($("table.screen tr:lt(11) td:contains(x)").size()).toEqual(11 * 80);
+          expect($("table.screen tr:gt(10) td:contains(x)").size()).toEqual(0);
+        });
 
+        it("should alias to CSI J", function() {
+          $("table.screen td").html("x");
+          screen.setCursor(12, 40);
+          screen.print(CSI + "J");
+          expect($("table.screen tr:lt(11) td:contains(x)").size()).toEqual(11 * 80);
+          expect($("table.screen tr:gt(10) td:contains(x)").size()).toEqual(0);
+        });
+      });
+
+      describe("Erase Above: CSI 1 J", function () {
+        it("should clear the screen from the current through the top line (inclusive)", function() {
+          $("table.screen td").html("x");
+          screen.setCursor(12, 40);
+          screen.print(CSI + "1J");
+          expect($("table.screen tr:lt(12) td:contains(x)").size()).toEqual(0);
+          expect($("table.screen tr:gt(11) td:contains(x)").size()).toEqual((25 - 12) * 80);
+        });
+      });
+
+      describe("Erase All: CSI 2 J", function () {
+        it("should clear the screen", function() {
+          $("table.screen td").html("x");
+          screen.print(CSI + "2J");
+          expect($("table.screen td:contains(x)").size()).toEqual(0);
+        });
       });
     });
+
+
+    //    describe("Erase in Line (EL), Erase to Right: CSI K", function () {
+    //      it("should clear the screen", function() {
+    //        $("table.screen td").html("x");
+    //        expect($("table.screen td:contains(x)").size()).toEqual(25 * 80);
+    //        screen.print(CSI + "2J");
+    //        expect($("table.screen td:contains(x)").size()).toEqual(0);
+    //      });
+    //    });
+
 
   });
 
