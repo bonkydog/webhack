@@ -1,13 +1,4 @@
 ~ @game.name
 
 .screen-container
-
-
-%pre#transcript
-  = @game.transcript
-
-
-- form_tag(game_dungeon_path(@game),  :method => "put", :class => "ajax") do
-  = text_field_tag :move, "", :class => "focus no-autocomplete"
-  = submit_tag "Move", :class => "inviso"
   
