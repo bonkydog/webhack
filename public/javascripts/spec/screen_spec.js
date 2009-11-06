@@ -434,6 +434,29 @@ describe('screen', function () {
 
     });
 
+    describe("backspace (ctrl-H, code 8)", function () {
+
+
+      it("should move the cursor back one cell", function() {
+        screen.setCursor(10,20);
+        screen.print("\u0008");
+        expect(screen.getCursor()).toEqual({row: 10, col:19});
+      });
+
+      it("should should not delete anything", function() {
+        screen.setCursor(10,20);
+        screen.print("abc");
+        screen.setCursor(11,20);
+        screen.print("\u0008");
+        expect(screen.getCharacter(10,20)).toEqual("a");
+        expect(screen.getCharacter(10,21)).toEqual("b");
+        expect(screen.getCharacter(10,22)).toEqual("c");
+
+      });
+
+    });
+    
+
     describe("unimplemented codes", function () {
       it("should ignore unimplemented codes and return to normal mode", function() {
         screen.putCharacter("a", 1, 1);

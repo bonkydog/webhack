@@ -4,6 +4,8 @@ WEBHACK.screen = function (container_selector, my){
 
   // private ####################################
 
+  var LOG_RENDERING = false;
+
   var MIN_ROW = 1;
   var MIN_COL = 1;
   var MAX_ROW = 25;
@@ -46,7 +48,7 @@ WEBHACK.screen = function (container_selector, my){
   };
 
   var numerify = function(string_or_number) {
-    if (string_or_number === "") return 1; // lots of ANSI codes have arguments that default to 1 if missing.
+    if (string_or_number === "" || string_or_number === undefined) return 1; // lots of ANSI codes have arguments that default to 1 if missing.
     return Object.isString(string_or_number) ? parseInt(string_or_number, 10) : string_or_number;
   };
 
@@ -75,6 +77,10 @@ WEBHACK.screen = function (container_selector, my){
     return findCell(row, col).html();
   };
 
+  var moveCursorUp =      function(n){ cursor.row = Math.max(cursor.row - numerify(n), MIN_ROW) };
+  var moveCursorDown =    function(n){ cursor.row = Math.min(cursor.row + numerify(n), MAX_ROW) };
+  var moveCursorBack =    function(n){ cursor.col = Math.max(cursor.col - numerify(n), MIN_COL) };
+  var moveCursorForward = function(n){ cursor.col = Math.min(cursor.col + numerify(n), MAX_COL) };
 
   var ESCAPE_SEQUENCES = [
 
@@ -85,16 +91,19 @@ WEBHACK.screen = function (container_selector, my){
     [/^\u001B\[H/, function(){setCursor(1,1)}],
 
     //Cursor Up
-    [/^\u001B\[(\d*)A/, function(n){cursor.row = Math.max(cursor.row - numerify(n), MIN_ROW)}],
+    [/^\u001B\[(\d*)A/, moveCursorUp],
 
     //Cursor Down
-    [/^\u001B\[(\d*)B/, function(n){cursor.row = Math.min(cursor.row + numerify(n), MAX_ROW)}],
+    [/^\u001B\[(\d*)B/, moveCursorDown],
 
     //Cursor Back
-    [/^\u001B\[(\d*)D/, function(n){cursor.col = Math.max(cursor.col - numerify(n), MIN_COL)}],
+    [/^\u001B\[(\d*)D/, moveCursorBack],
 
     //Cursor Forward
-    [/^\u001B\[(\d*)C/, function(n){cursor.col = Math.min(cursor.col + numerify(n), MAX_COL)}],
+    [/^\u001B\[(\d*)C/, moveCursorForward],
+
+    //Backspace (move character back, don't delete anything)
+    [/^\u0008/, moveCursorBack],
 
     // Erase in Display: Erase Below
     [/^\u001B\[0?J/, function(){$("table.screen tr:gt(" + (cursor.row - 2) + ") td").html("")}],
@@ -123,13 +132,13 @@ WEBHACK.screen = function (container_selector, my){
   var handleEscape = function(character) {
     var swallow_character = false;
 
-    if (character == "\u001B") {
+    if (character === "\u001B" || character === "\u0008") {
       escapeBuffer = "";
       escaping = true;
     }
 
     if (escaping) {
-      // console.error("escaped character: ", character);
+      if (LOG_RENDERING) console.log("escaped character: ", character);
       swallow_character = true;
       escapeBuffer += character;
       ESCAPE_SEQUENCES.each(function(mapping){
@@ -151,7 +160,7 @@ WEBHACK.screen = function (container_selector, my){
   var writeCharacter = function(character){
 
     if (handleEscape(character)) return;
-    // console.error("rendered character: ", character);
+    if (LOG_RENDERING) console.log("rendered character: ", character);
 
     putCharacter(character, cursor.row, cursor.col);
     cursor.col++;

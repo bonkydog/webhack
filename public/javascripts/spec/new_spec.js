@@ -10,6 +10,7 @@ describe('screen', function () {
     screen = WEBHACK.screen("#scratch");
   });
 
+  var CSI = "\u001B["; // ANSI Control Sequence Introducer
 
 
 });
