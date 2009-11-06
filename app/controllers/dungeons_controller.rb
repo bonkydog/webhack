@@ -10,9 +10,9 @@ class DungeonsController < ActionController::Base
 
     @output = @game.move_and_look(move)
 
-    @game.transcript = "" if @game.transcript.blank?
-    @game.transcript += @output
-    @game.save!
+    # @game.transcript = "" if @game.transcript.blank?
+    # @game.transcript += @output
+    # @game.save!
 
     respond_to do |format|
       # format.html { redirect_to @game }
