@@ -212,6 +212,14 @@ describe('screen', function () {
         expect(screen.getCursor().col).toEqual(23);
       });
 
+      it("should default 1,1 if coordinates are missing", function() {
+        screen.setCursor(10,10);
+        screen.print(CSI + "H");
+        expect(screen.getCursor().row).toEqual(1);
+        expect(screen.getCursor().col).toEqual(1);
+      });
+
+
       it("should not print characters", function() {
         screen.putCharacter("!", 5, 23);
         screen.setCursor(1, 1);

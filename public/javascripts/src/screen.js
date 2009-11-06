@@ -77,6 +77,9 @@ WEBHACK.screen = function (container_selector, my){
     //Cursor Position
     [/^\u001B\[(\d{1,2});(\d{1,2})H/, setCursor],
 
+    //Cursor Position: default to 1,1
+    [/^\u001B\[H/, function(){setCursor(1,1)}],
+
     // Erase in Display: Erase Below
     [/^\u001B\[0?J/, function(){$("table.screen tr:gt(" + (cursor.row - 2) + ") td").html("")}],
 
