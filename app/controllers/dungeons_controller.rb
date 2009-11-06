@@ -15,7 +15,7 @@ class DungeonsController < ActionController::Base
     @game.save!
 
     respond_to do |format|
-      format.html { redirect_to @game }
+      # format.html { redirect_to @game }
       format.js {} 
     end
 
