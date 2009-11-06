@@ -203,7 +203,7 @@ describe('screen', function () {
     // http://en.wikipedia.org/wiki/ANSI_escape_code
     // http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 
-    var CSI = "\u001B]"; // ANSI Control Sequence Introducer
+    var CSI = "\u001B["; // ANSI Control Sequence Introducer
 
     describe("Cursor Position (CUP): CSI row ; col H", function () {
       it("should move the cursor to the requested position", function() {
@@ -331,6 +331,16 @@ describe('screen', function () {
         });
       });
 
+    });
+
+    describe("unimplemented codes", function () {
+      it("should ignore unimplemented codes and return to normal mode", function() {
+        screen.putCharacter("a", 1, 1);
+        screen.setCursor(1,1);
+        screen.print(CSI + "?25h"); // DEC specific: hide cursor.
+        screen.print("z");
+        expect(screen.getCharacter(1,1)).toEqual("z");
+      });
     });
 
 

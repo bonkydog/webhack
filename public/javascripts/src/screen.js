@@ -57,7 +57,10 @@ WEBHACK.screen = function (container_selector, my){
     if (row > MAX_ROW) throw "Row cannot greater than " + MAX_ROW + ". It was " + row + ".";
     if (col > MAX_COL) throw "Column cannot be greater than " + MAX_COL + ". It was " + col + ".";
 
-    return tbody.children().slice(row - 1, row).children().slice(col - 1, col);
+    var tr = tbody.children().slice(row - 1, row);
+    var cell = tr.children().slice(col - 1, col);
+    if (cell.size() != 1) throw "Couldn't find cell: " + row + "," + col;
+    return cell;
   };
 
   var putCharacter = function(character, row, col){
@@ -72,27 +75,30 @@ WEBHACK.screen = function (container_selector, my){
   var ESCAPE_SEQUENCES = [
 
     //Cursor Position
-    [/^\u001B](\d{1,2});(\d{1,2})H/, setCursor],
+    [/^\u001B\[(\d{1,2});(\d{1,2})H/, setCursor],
 
     // Erase in Display: Erase Below
-    [/^\u001B]0?J/, function(){$("table.screen tr:gt(" + (cursor.row - 2) + ") td").html("")}],
+    [/^\u001B\[0?J/, function(){$("table.screen tr:gt(" + (cursor.row - 2) + ") td").html("")}],
 
     // Erase in Display: Erase Above
-    [/^\u001B]1J/, function(){$("table.screen tr:lt(" + cursor.row + ") td").html("")}],
+    [/^\u001B\[1J/, function(){$("table.screen tr:lt(" + cursor.row + ") td").html("")}],
 
     // Erase in Display: Erase All
-    [/^\u001B]2J/, function(){$("table.screen td").html("")}],
+    [/^\u001B\[2J/, function(){$("table.screen td").html("")}],
 
     // Erase in Line: Erase to Right
-    [/^\u001B]0?K/, function(){
+    [/^\u001B\[0?K/, function(){
       $("table.screen tr:eq(" + (cursor.row - 1) + ") td:gt(" + (cursor.col - 2) + ")").html("")
     }],
 
     // Erase in Line: Erase to Right
-    [/^\u001B]1K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td:lt(" + cursor.col + ")").html("")}],
+    [/^\u001B\[1K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td:lt(" + cursor.col + ")").html("")}],
 
     // Erase in Line: Erase All
-    [/^\u001B]2K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td").html("")}]
+    [/^\u001B\[2K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td").html("")}],
+
+    // Unimplemented sequence: log and ignore.
+    [/^(\u001B\[\??\d*;?\d*[a-zA-Z@`])/, function(x){console.error("Unimplemented ANSI escape sequence: " + x)}]
   ];
 
   var handleEscape = function(character) {
@@ -104,6 +110,7 @@ WEBHACK.screen = function (container_selector, my){
     }
 
     if (escaping) {
+      // console.error("escaped character: ", character);
       swallow_character = true;
       escapeBuffer += character;
       ESCAPE_SEQUENCES.each(function(mapping){
@@ -125,6 +132,7 @@ WEBHACK.screen = function (container_selector, my){
   var writeCharacter = function(character){
 
     if (handleEscape(character)) return;
+    // console.error("rendered character: ", character);
 
     putCharacter(character, cursor.row, cursor.col);
     cursor.col++;
