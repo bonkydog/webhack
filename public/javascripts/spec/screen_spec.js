@@ -205,17 +205,110 @@ describe('screen', function () {
 
     var CSI = "\u001B["; // ANSI Control Sequence Introducer
 
+    describe("ANSI escape codes handling", function () {
+
+      var CSI = "\u001B["; // ANSI Control Sequence Introducer
+
+      describe("Cursor Up (CUU): CSI n A", function () {
+        it("should move the cursor n spaces up.", function() {
+          screen.setCursor(12, 40);
+          screen.print(CSI + "2A");
+          expect(screen.getCursor()).toEqual({row: 10, col: 40});
+        });
+
+        it("should default 1 space up if n is missing", function() {
+          screen.setCursor(12, 40);
+          screen.print(CSI + "A");
+          expect(screen.getCursor()).toEqual({row: 11, col: 40});
+        });
+
+        it("should default stop at the edge of the screen", function() {
+          screen.setCursor(12, 40);
+          screen.print(CSI + "14A");
+          expect(screen.getCursor()).toEqual({row: 1, col: 40});
+        });
+
+      });
+
+
+      describe("Cursor down (CUD): CSI n B", function () {
+        it("should move the cursor n spaces down.", function() {
+          screen.setCursor(12, 40);
+          screen.print(CSI + "2B");
+          expect(screen.getCursor()).toEqual({row: 14, col: 40});
+        });
+
+        it("should default 1 space down if n is missing", function() {
+          screen.setCursor(12, 40);
+          screen.print(CSI + "B");
+          expect(screen.getCursor()).toEqual({row: 13, col: 40});
+        });
+
+        it("should default stop at the edge of the screen", function() {
+          screen.setCursor(12, 40);
+          screen.print(CSI + "14B");
+          expect(screen.getCursor()).toEqual({row: 25, col: 40});
+        });
+
+      });
+
+      describe("Cursor Back (CUB): CSI n D", function () {
+        it("should move the cursor n spaces back.", function() {
+          screen.setCursor(12, 40);
+          screen.print(CSI + "2D");
+          expect(screen.getCursor()).toEqual({row: 12, col: 38});
+        });
+
+        it("should default 1 space back if n is missing", function() {
+          screen.setCursor(12, 40);
+          screen.print(CSI + "D");
+          expect(screen.getCursor()).toEqual({row: 12, col: 39});
+        });
+
+        it("should default stop at the edge of the screen", function() {
+          screen.setCursor(12, 40);
+          screen.print(CSI + "50D");
+          expect(screen.getCursor()).toEqual({row: 12, col: 1});
+        });
+
+      });
+
+
+      describe("Cursor forward (CUF): CSI n C", function () {
+        it("should move the cursor n spaces forward.", function() {
+          screen.setCursor(12, 40);
+          screen.print(CSI + "2C");
+          expect(screen.getCursor()).toEqual({row: 12, col: 42});
+        });
+
+        it("should default 1 space forward if n is missing", function() {
+          screen.setCursor(12, 40);
+          screen.print(CSI + "C");
+          expect(screen.getCursor()).toEqual({row: 12, col: 41});
+        });
+
+        it("should default stop at the edge of the screen", function() {
+          screen.setCursor(12, 40);
+          screen.print(CSI + "50C");
+          expect(screen.getCursor()).toEqual({row: 12, col: 80});
+        });
+
+      });
+
+
+    });
+
+
     describe("Cursor Position (CUP): CSI row ; col H", function () {
       it("should move the cursor to the requested position", function() {
         screen.print(CSI + "5;23H");
-        expect(screen.getCursor().row).toEqual(5);
-        expect(screen.getCursor().col).toEqual(23);
+        expect(screen.getCursor()).toEqual({row: 5, col: 23});
       });
 
       it("should default 1,1 if coordinates are missing", function() {
         screen.setCursor(10,10);
         screen.print(CSI + "H");
-        expect(screen.getCursor().row).toEqual(1);
+        expect(screen.getCursor()).toEqual({row: 1, col: 1});
         expect(screen.getCursor().col).toEqual(1);
       });
 
@@ -225,7 +318,7 @@ describe('screen', function () {
         screen.setCursor(1, 1);
         screen.print("fox");
         screen.print(CSI + "5;23H");
-        expect(screen.getCursor().row).toEqual(5);
+        expect(screen.getCursor()).toEqual({row: 5, col: 23});
         expect(screen.getCursor().col).toEqual(23);
         expect(screen.getCharacter(1, 1)).toEqual("f");
         expect(screen.getCharacter(1, 2)).toEqual("o");

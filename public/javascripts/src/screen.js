@@ -36,13 +36,17 @@ WEBHACK.screen = function (container_selector, my){
     }
   };
 
+
   build();
+
+  
 
   var getCursor = function (){
     return {row: cursor.row, col: cursor.col};
   };
 
   var numerify = function(string_or_number) {
+    if (string_or_number === "") return 1; // lots of ANSI codes have arguments that default to 1 if missing.
     return Object.isString(string_or_number) ? parseInt(string_or_number, 10) : string_or_number;
   };
 
@@ -79,6 +83,18 @@ WEBHACK.screen = function (container_selector, my){
 
     //Cursor Position: default to 1,1
     [/^\u001B\[H/, function(){setCursor(1,1)}],
+
+    //Cursor Up
+    [/^\u001B\[(\d*)A/, function(n){cursor.row = Math.max(cursor.row - numerify(n), MIN_ROW)}],
+
+    //Cursor Down
+    [/^\u001B\[(\d*)B/, function(n){cursor.row = Math.min(cursor.row + numerify(n), MAX_ROW)}],
+
+    //Cursor Back
+    [/^\u001B\[(\d*)D/, function(n){cursor.col = Math.max(cursor.col - numerify(n), MIN_COL)}],
+
+    //Cursor Forward
+    [/^\u001B\[(\d*)C/, function(n){cursor.col = Math.min(cursor.col + numerify(n), MAX_COL)}],
 
     // Erase in Display: Erase Below
     [/^\u001B\[0?J/, function(){$("table.screen tr:gt(" + (cursor.row - 2) + ") td").html("")}],
