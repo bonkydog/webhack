@@ -4,10 +4,7 @@ describe('screen', function () {
   var screen;
   beforeEach(function() {
 
-    $("#scratch").remove();
-    $("body").append($("<div>").attr("id", "scratch"));
-
-    screen = WEBHACK.create_screen("#scratch");
+    screen = WEBHACK.create_screen("body");
   });
 
   describe("construction", function () {
@@ -379,10 +376,8 @@ describe('screen', function () {
 
     describe("erasure", function () {
 
-      var all_tds;
       beforeEach(function() {
-        all_tds =  $("table.screen td");
-        all_tds.html("x").addClass("inverse");
+        $("table.screen td").html("x").addClass("inverse");
       });
 
       describe("Erase in Display (ED) CSI code K", function () {
@@ -461,8 +456,8 @@ describe('screen', function () {
             expect($("table.screen tr:eq(11) td:gt(39):contains(x)").size()).toEqual(80 - 40);
             expect($("table.screen tr:lt(11) td.inverse").size()).toEqual(11 * 80);
             expect($("table.screen tr:gt(11) td.inverse").size()).toEqual((25 - 12) * 80);
-            expect($("table.screen tr:eq(11) td:lt(40)").filter("td").filter(".inverse").size()).toEqual(0);
-            expect($("table.screen tr:eq(11) td:gt(39)").filter("td").filter(".inverse").size()).toEqual(80 - 40);
+            expect($("table.screen tr:eq(11) td:lt(40)").filter(".inverse").size()).toEqual(0);
+            expect($("table.screen tr:eq(11) td:gt(39)").filter(".inverse").size()).toEqual(80 - 40);
             expect(screen.getCharacter(12, 40)).toEqual("");
             expect(screen.getCharacter(12, 39)).toEqual("");
             expect(screen.getCharacter(12, 41)).toEqual("x");

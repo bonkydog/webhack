@@ -1,4 +1,4 @@
-WEBHACK.create_screen = function (container_selector){
+WEBHACK.create_screen = function (container_selector) {
 
   var $ = jQuery;
 
@@ -12,7 +12,7 @@ WEBHACK.create_screen = function (container_selector){
   var MAX_COL = 80;
 
   var cursor = {row: 1, col: 1};
-  var container = $(container_selector).slice(0,1);
+  var container = $(container_selector).slice(0, 1);
   var table;
   var tbody;
   var escapeBuffer = "";
@@ -20,28 +20,33 @@ WEBHACK.create_screen = function (container_selector){
 
   var sgr_mode = 0;
 
-  var buildRow = function(tr){
+  var buildRow = function(tr) {
     for (var row = 0; row < MAX_COL; ++row) {
       tr.append($("<td>"));
     }
   };
 
   var build = function() {
-    tbody = $("<tbody>");
-    table = $("<table>").addClass("screen");
-    table.append(tbody);
-    container.append(table);
-    var col;
-    for (col = 0; col < MAX_ROW; ++col) {
-      var tr = $("<tr>");
-      tbody.append(tr);
-      buildRow(tr);
+    table = $("table.screen").slice(0,1);
+    if (table.size() > 0) {
+      table.contents("td").erase();
+      tbody = table.children("tbody"); 
+    } else {
+      tbody = $("<tbody>");
+      table = $("<table>").addClass("screen");
+      table.append(tbody);
+      container.append(table);
+      var col;
+      for (col = 0; col < MAX_ROW; ++col) {
+        var tr = $("<tr>");
+        tbody.append(tr);
+        buildRow(tr);
+      }
     }
+
   };
 
-  build();
-
-  var getCursor = function (){
+  var getCursor = function () {
     return {row: cursor.row, col: cursor.col};
   };
 
@@ -50,12 +55,12 @@ WEBHACK.create_screen = function (container_selector){
     return $.isString(string_or_number) ? parseInt(string_or_number, 10) : string_or_number;
   };
 
-  var setCursor = function(row, col){
+  var setCursor = function(row, col) {
     cursor.row = numerify(row);
     cursor.col = numerify(col);
   };
 
-  var findCell = function(row, col){
+  var findCell = function(row, col) {
     if (row < MIN_ROW) throw "Row cannot be less than " + MIN_ROW + ". It was " + row + ".";
     if (col < MIN_COL) throw "Column cannot be less than " + MIN_COL + ". It was " + col + ".";
     if (row > MAX_ROW) throw "Row cannot greater than " + MAX_ROW + ". It was " + row + ".";
@@ -67,20 +72,28 @@ WEBHACK.create_screen = function (container_selector){
     return cell;
   };
 
-  var putCharacter = function(character, row, col){
+  var putCharacter = function(character, row, col) {
     findCell(row, col).html(character);
   };
 
-  var getCharacter = function(row, col){
+  var getCharacter = function(row, col) {
     return findCell(row, col).html();
   };
 
-  var moveCursorUp =      function(n){ cursor.row = Math.max(cursor.row - numerify(n), MIN_ROW) };
-  var moveCursorDown =    function(n){ cursor.row = Math.min(cursor.row + numerify(n), MAX_ROW) };
-  var moveCursorBack =    function(n){ cursor.col = Math.max(cursor.col - numerify(n), MIN_COL) };
-  var moveCursorForward = function(n){ cursor.col = Math.min(cursor.col + numerify(n), MAX_COL) };
+  var moveCursorUp = function(n) {
+    cursor.row = Math.max(cursor.row - numerify(n), MIN_ROW)
+  };
+  var moveCursorDown = function(n) {
+    cursor.row = Math.min(cursor.row + numerify(n), MAX_ROW)
+  };
+  var moveCursorBack = function(n) {
+    cursor.col = Math.max(cursor.col - numerify(n), MIN_COL)
+  };
+  var moveCursorForward = function(n) {
+    cursor.col = Math.min(cursor.col + numerify(n), MAX_COL)
+  };
 
-  jQuery.fn.erase = function(){
+  jQuery.fn.erase = function() {
     this.html("").removeAttr("class");
   }
 
@@ -90,7 +103,9 @@ WEBHACK.create_screen = function (container_selector){
     [/^\u001B\[(\d{1,2});(\d{1,2})H/, setCursor],
 
     //Cursor Position: default to 1,1
-    [/^\u001B\[H/, function(){setCursor(1,1)}],
+    [/^\u001B\[H/, function() {
+      setCursor(1, 1)
+    }],
 
     //Cursor Up
     [/^\u001B\[(\d*)A/, moveCursorUp],
@@ -108,35 +123,49 @@ WEBHACK.create_screen = function (container_selector){
     [/^\u0008/, moveCursorBack],
 
     // Erase in Display: Erase Below
-    [/^\u001B\[0?J/, function(){$("table.screen tr:gt(" + (cursor.row - 2) + ") td").erase()}],
+    [/^\u001B\[0?J/, function() {
+      $("table.screen tr:gt(" + (cursor.row - 2) + ") td").erase()
+    }],
 
     // Erase in Display: Erase Above
-    [/^\u001B\[1J/, function(){$("table.screen tr:lt(" + cursor.row + ") td").erase()}],
+    [/^\u001B\[1J/, function() {
+      $("table.screen tr:lt(" + cursor.row + ") td").erase()
+    }],
 
     // Erase in Display: Erase All
-    [/^\u001B\[2J/, function(){$("table.screen td").erase()}],
+    [/^\u001B\[2J/, function() {
+      $("table.screen td").erase()
+    }],
 
     // Erase in Line: Erase to Right
-    [/^\u001B\[0?K/, function(){
+    [/^\u001B\[0?K/, function() {
       $("table.screen tr:eq(" + (cursor.row - 1) + ") td:gt(" + (cursor.col - 2) + ")").erase()
     }],
 
     // Erase in Line: Erase to Left
-    [/^\u001B\[1K/, function(){
+    [/^\u001B\[1K/, function() {
       $("table.screen tr:eq(" + (cursor.row - 1) + ") td:lt(" + cursor.col + ")").erase()
     }],
 
     // Erase in Line: Erase All
-    [/^\u001B\[2K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td").erase()}],
+    [/^\u001B\[2K/, function() {
+      $("table.screen tr:eq(" + (cursor.row - 1) + ") td").erase()
+    }],
 
     // Set Graphic Rendition: inverse
-    [/^\u001B\[7m/, function(){sgr_mode = 7}],
+    [/^\u001B\[7m/, function() {
+      sgr_mode = 7
+    }],
 
     // Set Graphic Rendition: normal
-    [/^\u001B\[0?m/, function(){sgr_mode = 0}],
+    [/^\u001B\[0?m/, function() {
+      sgr_mode = 0
+    }],
 
     // Unimplemented sequence: log and ignore.
-    [/^(\u001B\[\??\d*;?\d*[a-zA-Z@`])/, function(x){console.error("Unimplemented ANSI escape sequence: " + x)}]
+    [/^(\u001B\[\??\d*;?\d*[a-zA-Z@`])/, function(x) {
+      console.error("Unimplemented ANSI escape sequence: " + x)
+    }]
   ];
 
   var handleEscape = function(character) {
@@ -151,7 +180,7 @@ WEBHACK.create_screen = function (container_selector){
       if (LOG_RENDERING) console.log("escaped character: ", character);
       swallow_character = true;
       escapeBuffer += character;
-      $.each(ESCAPE_SEQUENCES, function(){
+      $.each(ESCAPE_SEQUENCES, function() {
         var mapping = this;
         if (!escaping) return;
         var regex = mapping[0];
@@ -168,7 +197,7 @@ WEBHACK.create_screen = function (container_selector){
     return swallow_character;
   };
 
-  var writeCharacter = function(character){
+  var writeCharacter = function(character) {
 
     if (handleEscape(character)) return;
     if (LOG_RENDERING) console.log("rendered character: ", character);
@@ -185,7 +214,7 @@ WEBHACK.create_screen = function (container_selector){
 
       if (cursor.row > MAX_ROW) {
         cursor.row = MAX_ROW;
-        var top_tr = tbody.children().slice(0,1);
+        var top_tr = tbody.children().slice(0, 1);
         top_tr.remove();
         var tr = $("<tr>");
         buildRow(tr);
@@ -194,20 +223,22 @@ WEBHACK.create_screen = function (container_selector){
     }
   };
 
-  var print = function(string){
-    $.each($.makeArray(string.split('')), function(i, c){
+  var print = function(string) {
+    $.each($.makeArray(string.split('')), function(i, c) {
       writeCharacter(c);
     });
   };
 
-  var addClass = function(css_class, row, col){
+  var addClass = function(css_class, row, col) {
     findCell(row, col).addClass(css_class);
   };
 
-  var removeClass = function(css_class, row, col){
+  var removeClass = function(css_class, row, col) {
     findCell(row, col).removeClass(css_class);
   };
 
+  build();
+  
   // interface ##################################
 
   var self = {};
@@ -222,7 +253,7 @@ WEBHACK.create_screen = function (container_selector){
   self.print = print;
   self.addClass = addClass;
   self.removeClass = removeClass;
-  
+
   return self;
 };
 
