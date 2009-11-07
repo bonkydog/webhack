@@ -2,7 +2,7 @@ WEBHACK.create_listener = function (uri){
 
   var $ = jQuery;
 
-  var LOG = true;
+  var LOG = false;
 
   var uri = uri;
   var ready_to_send = true;
@@ -88,11 +88,11 @@ WEBHACK.create_listener = function (uri){
 
 
   var start = function(){
-    $().bind("keydown", handleEvent);
+    $().bind("keypress", handleEvent);
   };
 
   var stop = function(){
-    $().unbind("keydown", handleEvent);
+    $().unbind("keypress", handleEvent);
   };
 
   // interface ##################################

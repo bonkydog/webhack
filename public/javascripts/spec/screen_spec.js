@@ -113,6 +113,7 @@ describe('screen', function () {
 
     });
 
+
     describe("getCharacter", function () {
       it("should get the character from the cell at the requested coordinates", function() {
         screen.putCharacter("*", 5, 19);
@@ -125,8 +126,6 @@ describe('screen', function () {
         expect(screen.getCursor().row).toEqual(cursor_before.row);
         expect(screen.getCursor().col).toEqual(cursor_before.col);
       });
-
-
     });
 
     describe("writeChraracter", function () {
@@ -196,6 +195,22 @@ describe('screen', function () {
       expect(screen.getCharacter(1, 3)).toEqual("x");
     });
   });
+
+  describe("addClass", function () {
+    it("should add a class to the current cell", function() {
+      screen.addClass("inverse", 1, 1);
+      expect(screen.findCell(1, 1).hasClass("inverse")).toBeTruthy();
+    });
+  });
+
+  describe("removeClass", function () {
+    it("should add a class to the current cell", function() {
+      screen.addClass("inverse", 1, 1);
+      screen.removeClass("inverse", 1, 1);
+      expect(screen.findCell(1, 1).hasClass("inverse")).toBeFalsy();
+    });
+  });
+
 
   describe("ANSI escape codes handling", function () {
 
@@ -307,7 +322,7 @@ describe('screen', function () {
       });
 
       it("should default 1,1 if coordinates are missing", function() {
-        screen.setCursor(10,10);
+        screen.setCursor(10, 10);
         screen.print(CSI + "H");
         expect(screen.getCursor()).toEqual({row: 1, col: 1});
         expect(screen.getCursor().col).toEqual(1);
@@ -335,123 +350,166 @@ describe('screen', function () {
       });
     });
 
-    describe("Erase in Display (ED) CSI code K", function () {
-
-      describe("Erase Below: CSI 0 J", function () {
-        var test = function(message, code){
-          it(message, function() {
-            $("table.screen td").html("x");
-            screen.setCursor(12, 40);
-            screen.print(code);
-            expect($("table.screen tr:lt(11) td:contains(x)").size()).toEqual(11 * 80);
-            expect($("table.screen tr:gt(10) td:contains(x)").size()).toEqual(0);
-          });
-
-        };
-
-        test("should clear the screen from the current through the bottom line (inclusive)", CSI + "0J");
-        test("should alias to CSI J", CSI + "J");
+    describe("Select Graphic Rendition (SGR) CSI mode m", function () {
+      it("should add inverse class to all printed characters after mode is 7", function() {
+        screen.setCursor(1, 1);
+        screen.print(CSI + "7m");
+        screen.print("me");
+        expect(screen.findCell(1, 1).hasClass("inverse")).toBeTruthy();
+        expect(screen.findCell(1, 2).hasClass("inverse")).toBeTruthy();
       });
 
-      describe("Erase Above: CSI 1 J", function () {
-        it("should clear the screen from the current through the top line (inclusive)", function() {
-          $("table.screen td").html("x");
-          screen.setCursor(12, 40);
-          screen.print(CSI + "1J");
-          expect($("table.screen tr:lt(12) td:contains(x)").size()).toEqual(0);
-          expect($("table.screen tr:gt(11) td:contains(x)").size()).toEqual((25 - 12) * 80);
+
+      var test = function(message, mode) {
+        it(message, function() {
+          screen.setCursor(1, 1);
+          screen.print(CSI + "7m");
+          screen.print(CSI + mode + "m");
+          screen.print("me");
+          expect(screen.findCell(1, 1).hasClass("inverse")).toBeFalsy();
+          expect(screen.findCell(1, 2).hasClass("inverse")).toBeFalsy();
+
         });
-      });
 
-      describe("Erase All: CSI 2 J", function () {
-        it("should clear the screen", function() {
-          $("table.screen td").html("x");
-          screen.print(CSI + "2J");
-          expect($("table.screen td:contains(x)").size()).toEqual(0);
-        });
-      });
+      };
+      test("should stop adding inverse class after mode is set to 0", "0");
+      test("should default to mode 0", "");
+
     });
 
-    describe("Erase in Line (EL)", function () {
+    describe("erasure", function () {
 
-      describe("Erase to Right: CSI 0 K", function () {
+      var all_tds;
+      beforeEach(function() {
+        all_tds =  $("table.screen td");
+        all_tds.html("x").addClass("inverse");
+      });
 
-        var test = function(message, code) {
-          it(message, function() {
-            $("table.screen td").html("x");
+      describe("Erase in Display (ED) CSI code K", function () {
+
+        describe("Erase Below: CSI 0 J", function () {
+          var test = function(message, code) {
+            it(message, function() {
+              screen.setCursor(12, 40);
+              screen.print(code);
+              expect($("table.screen tr:lt(11) td:contains(x)").size()).toEqual(11 * 80);
+              expect($("table.screen tr:gt(10) td:contains(x)").size()).toEqual(0);
+              expect($("table.screen tr:lt(11) td.inverse").size()).toEqual(11 * 80);
+              expect($("table.screen tr:gt(10) td.inverse").size()).toEqual(0);
+            });
+
+          };
+
+          test("should clear the screen from the current through the bottom line (inclusive)", CSI + "0J");
+          test("should alias to CSI J", CSI + "J");
+        });
+
+        describe("Erase Above: CSI 1 J", function () {
+          it("should clear the screen from the current through the top line (inclusive)", function() {
             screen.setCursor(12, 40);
-            screen.print(code);
+            screen.print(CSI + "1J");
+            expect($("table.screen tr:lt(12) td:contains(x)").size()).toEqual(0);
+            expect($("table.screen tr:gt(11) td:contains(x)").size()).toEqual((25 - 12) * 80);
+            expect($("table.screen tr:lt(12) td.inverse").size()).toEqual(0);
+            expect($("table.screen tr:gt(11) td.inverse").size()).toEqual((25 - 12) * 80);
+          });
+        });
+
+        describe("Erase All: CSI 2 J", function () {
+          it("should clear the screen", function() {
+            screen.print(CSI + "2J");
+            expect($("table.screen td:contains(x)").size()).toEqual(0);
+          });
+        });
+      });
+
+      describe("Erase in Line (EL)", function () {
+
+        describe("Erase to Right: CSI 0 K", function () {
+
+          var test = function(message, code) {
+            it(message, function() {
+              screen.setCursor(12, 40);
+              screen.print(code);
+              expect($("table.screen tr:lt(11) td:contains(x)").size()).toEqual(11 * 80);
+              expect($("table.screen tr:gt(11) td:contains(x)").size()).toEqual((25 - 12) * 80);
+              expect($("table.screen tr:eq(11) td:lt(39):contains(x)").size()).toEqual(39);
+              expect($("table.screen tr:eq(11) td:gt(38):contains(x)").size()).toEqual(0);
+              expect($("table.screen tr:eq(11) td:lt(39).inverse").size()).toEqual(39);
+              expect($("table.screen tr:eq(11) td:gt(38).inverse").size()).toEqual(0);
+              expect(screen.getCharacter(12, 40)).toEqual("");
+              expect(screen.getCharacter(12, 39)).toEqual("x");
+              expect(screen.getCharacter(12, 41)).toEqual("");
+              expect(screen.getCharacter(11, 40)).toEqual("x");
+              expect(screen.getCharacter(13, 41)).toEqual("x");
+            });
+          };
+
+          test("should clear line from the current column through the end (inclusive)", CSI + "0K");
+          test("should alias to CSI K", CSI + "K");
+
+        });
+
+
+        describe("Erase to Left: CSI 1 K", function () {
+          it("should clear line from the current column through the end (inclusive)", function() {
+            screen.setCursor(12, 40);
+            screen.print(CSI + "1K");
             expect($("table.screen tr:lt(11) td:contains(x)").size()).toEqual(11 * 80);
             expect($("table.screen tr:gt(11) td:contains(x)").size()).toEqual((25 - 12) * 80);
-            expect($("table.screen tr:eq(11) td:lt(39):contains(x)").size()).toEqual(39);
-            expect($("table.screen tr:eq(11) td:gt(38):contains(x)").size()).toEqual(0);
+            expect($("table.screen tr:eq(11) td:lt(40):contains(x)").size()).toEqual(0);
+            expect($("table.screen tr:eq(11) td:gt(39):contains(x)").size()).toEqual(80 - 40);
+            expect($("table.screen tr:lt(11) td.inverse").size()).toEqual(11 * 80);
+            expect($("table.screen tr:gt(11) td.inverse").size()).toEqual((25 - 12) * 80);
+            expect($("table.screen tr:eq(11) td:lt(40)").filter("td").filter(".inverse").size()).toEqual(0);
+            expect($("table.screen tr:eq(11) td:gt(39)").filter("td").filter(".inverse").size()).toEqual(80 - 40);
             expect(screen.getCharacter(12, 40)).toEqual("");
-            expect(screen.getCharacter(12, 39)).toEqual("x");
+            expect(screen.getCharacter(12, 39)).toEqual("");
+            expect(screen.getCharacter(12, 41)).toEqual("x");
+            expect(screen.getCharacter(11, 40)).toEqual("x");
+            expect(screen.getCharacter(13, 41)).toEqual("x");
+          });
+        });
+
+
+        describe("Erase All: CSI 2 K", function () {
+          it("should clear line from the current column through the end (inclusive)", function() {
+            screen.setCursor(12, 40);
+            screen.print(CSI + "2K");
+            expect($("table.screen tr:lt(11) td:contains(x)").size()).toEqual(11 * 80);
+            expect($("table.screen tr:gt(11) td:contains(x)").size()).toEqual((25 - 12) * 80);
+            expect($("table.screen tr:eq(11) td:contains(x)").size()).toEqual(0);
+            expect($("table.screen tr:lt(11) td").filter(".inverse").size()).toEqual(11 * 80);
+            expect($("table.screen tr:gt(11) td").filter(".inverse").size()).toEqual((25 - 12) * 80);
+            expect($("table.screen tr:eq(11) td").filter(".inverse").size()).toEqual(0);
+            expect(screen.getCharacter(12, 40)).toEqual("");
+            expect(screen.getCharacter(12, 39)).toEqual("");
             expect(screen.getCharacter(12, 41)).toEqual("");
             expect(screen.getCharacter(11, 40)).toEqual("x");
             expect(screen.getCharacter(13, 41)).toEqual("x");
           });
-        };
-
-        test("should clear line from the current column through the end (inclusive)", CSI + "0K");
-        test("should alias to CSI K", CSI + "K");
-
-      });
-
-
-      describe("Erase to Left: CSI 1 K", function () {
-        it("should clear line from the current column through the end (inclusive)", function() {
-          $("table.screen td").html("x");
-          screen.setCursor(12, 40);
-          screen.print(CSI + "1K");
-          expect($("table.screen tr:lt(11) td:contains(x)").size()).toEqual(11 * 80);
-          expect($("table.screen tr:gt(11) td:contains(x)").size()).toEqual((25 - 12) * 80);
-          expect($("table.screen tr:eq(11) td:lt(40):contains(x)").size()).toEqual(0);
-          expect($("table.screen tr:eq(11) td:gt(39):contains(x)").size()).toEqual(80 - 40);
-          expect(screen.getCharacter(12, 40)).toEqual("");
-          expect(screen.getCharacter(12, 39)).toEqual("");
-          expect(screen.getCharacter(12, 41)).toEqual("x");
-          expect(screen.getCharacter(11, 40)).toEqual("x");
-          expect(screen.getCharacter(13, 41)).toEqual("x");
         });
+
       });
-
-
-      describe("Erase All: CSI 2 K", function () {
-        it("should clear line from the current column through the end (inclusive)", function() {
-          $("table.screen td").html("x");
-          screen.setCursor(12, 40);
-          screen.print(CSI + "2K");
-          expect($("table.screen tr:lt(11) td:contains(x)").size()).toEqual(11 * 80);
-          expect($("table.screen tr:gt(11) td:contains(x)").size()).toEqual((25 - 12) * 80);
-          expect($("table.screen tr:eq(11) td:contains(x)").size()).toEqual(0);
-          expect(screen.getCharacter(12, 40)).toEqual("");
-          expect(screen.getCharacter(12, 39)).toEqual("");
-          expect(screen.getCharacter(12, 41)).toEqual("");
-          expect(screen.getCharacter(11, 40)).toEqual("x");
-          expect(screen.getCharacter(13, 41)).toEqual("x");
-        });
-      });
-
     });
 
     describe("backspace (ctrl-H, code 8)", function () {
 
 
       it("should move the cursor back one cell", function() {
-        screen.setCursor(10,20);
+        screen.setCursor(10, 20);
         screen.print("\u0008");
         expect(screen.getCursor()).toEqual({row: 10, col:19});
       });
 
       it("should should not delete anything", function() {
-        screen.setCursor(10,20);
+        screen.setCursor(10, 20);
         screen.print("abc");
-        screen.setCursor(11,20);
+        screen.setCursor(11, 20);
         screen.print("\u0008");
-        expect(screen.getCharacter(10,20)).toEqual("a");
-        expect(screen.getCharacter(10,21)).toEqual("b");
-        expect(screen.getCharacter(10,22)).toEqual("c");
+        expect(screen.getCharacter(10, 20)).toEqual("a");
+        expect(screen.getCharacter(10, 21)).toEqual("b");
+        expect(screen.getCharacter(10, 22)).toEqual("c");
 
       });
 
@@ -461,10 +519,10 @@ describe('screen', function () {
     describe("unimplemented codes", function () {
       it("should ignore unimplemented codes and return to normal mode", function() {
         screen.putCharacter("a", 1, 1);
-        screen.setCursor(1,1);
+        screen.setCursor(1, 1);
         screen.print(CSI + "?25h"); // DEC specific: hide cursor.
         screen.print("z");
-        expect(screen.getCharacter(1,1)).toEqual("z");
+        expect(screen.getCharacter(1, 1)).toEqual("z");
       });
     });
 

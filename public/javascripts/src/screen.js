@@ -18,6 +18,8 @@ WEBHACK.create_screen = function (container_selector){
   var escapeBuffer = "";
   var escaping = false;
 
+  var sgr_mode = 0;
+
   var buildRow = function(tr){
     for (var row = 0; row < MAX_COL; ++row) {
       tr.append($("<td>"));
@@ -78,6 +80,10 @@ WEBHACK.create_screen = function (container_selector){
   var moveCursorBack =    function(n){ cursor.col = Math.max(cursor.col - numerify(n), MIN_COL) };
   var moveCursorForward = function(n){ cursor.col = Math.min(cursor.col + numerify(n), MAX_COL) };
 
+  jQuery.fn.erase = function(){
+    this.html("").removeAttr("class");
+  }
+
   var ESCAPE_SEQUENCES = [
 
     //Cursor Position
@@ -102,24 +108,32 @@ WEBHACK.create_screen = function (container_selector){
     [/^\u0008/, moveCursorBack],
 
     // Erase in Display: Erase Below
-    [/^\u001B\[0?J/, function(){$("table.screen tr:gt(" + (cursor.row - 2) + ") td").html("")}],
+    [/^\u001B\[0?J/, function(){$("table.screen tr:gt(" + (cursor.row - 2) + ") td").erase()}],
 
     // Erase in Display: Erase Above
-    [/^\u001B\[1J/, function(){$("table.screen tr:lt(" + cursor.row + ") td").html("")}],
+    [/^\u001B\[1J/, function(){$("table.screen tr:lt(" + cursor.row + ") td").erase()}],
 
     // Erase in Display: Erase All
-    [/^\u001B\[2J/, function(){$("table.screen td").html("")}],
+    [/^\u001B\[2J/, function(){$("table.screen td").erase()}],
 
     // Erase in Line: Erase to Right
     [/^\u001B\[0?K/, function(){
-      $("table.screen tr:eq(" + (cursor.row - 1) + ") td:gt(" + (cursor.col - 2) + ")").html("")
+      $("table.screen tr:eq(" + (cursor.row - 1) + ") td:gt(" + (cursor.col - 2) + ")").erase()
     }],
 
-    // Erase in Line: Erase to Right
-    [/^\u001B\[1K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td:lt(" + cursor.col + ")").html("")}],
+    // Erase in Line: Erase to Left
+    [/^\u001B\[1K/, function(){
+      $("table.screen tr:eq(" + (cursor.row - 1) + ") td:lt(" + cursor.col + ")").erase()
+    }],
 
     // Erase in Line: Erase All
-    [/^\u001B\[2K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td").html("")}],
+    [/^\u001B\[2K/, function(){$("table.screen tr:eq(" + (cursor.row - 1) + ") td").erase()}],
+
+    // Set Graphic Rendition: inverse
+    [/^\u001B\[7m/, function(){sgr_mode = 7}],
+
+    // Set Graphic Rendition: normal
+    [/^\u001B\[0?m/, function(){sgr_mode = 0}],
 
     // Unimplemented sequence: log and ignore.
     [/^(\u001B\[\??\d*;?\d*[a-zA-Z@`])/, function(x){console.error("Unimplemented ANSI escape sequence: " + x)}]
@@ -160,6 +174,10 @@ WEBHACK.create_screen = function (container_selector){
     if (LOG_RENDERING) console.log("rendered character: ", character);
 
     putCharacter(character, cursor.row, cursor.col);
+
+    if (sgr_mode === 7) addClass("inverse", cursor.row, cursor.col);
+    if (sgr_mode === 0) removeClass("inverse", cursor.row, cursor.col);
+
     cursor.col++;
     if (cursor.col > MAX_COL) {
       cursor.col = 1;
@@ -182,6 +200,14 @@ WEBHACK.create_screen = function (container_selector){
     });
   };
 
+  var addClass = function(css_class, row, col){
+    findCell(row, col).addClass(css_class);
+  };
+
+  var removeClass = function(css_class, row, col){
+    findCell(row, col).removeClass(css_class);
+  };
+
   // interface ##################################
 
   var self = {};
@@ -194,6 +220,8 @@ WEBHACK.create_screen = function (container_selector){
   self.getCharacter = getCharacter;
   self.writeCharacter = writeCharacter;
   self.print = print;
+  self.addClass = addClass;
+  self.removeClass = removeClass;
   
   return self;
 };
