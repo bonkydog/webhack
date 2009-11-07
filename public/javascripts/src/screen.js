@@ -28,10 +28,10 @@ WEBHACK.create_screen = function (container_selector) {
   };
 
   var build = function() {
-    table = $("table.screen").slice(0,1);
+    table = $("table.screen").slice(0, 1);
     if (table.size() > 0) {
       table.contents("td").erase();
-      tbody = table.children("tbody"); 
+      tbody = table.children("tbody");
     } else {
       tbody = $("<tbody>");
       table = $("<table>").addClass("screen");
@@ -81,6 +81,23 @@ WEBHACK.create_screen = function (container_selector) {
     return findCell(row, col).html();
   };
 
+  var wrapOrScrollIfNecessary = function() {
+    if (cursor.col > MAX_COL) {
+      cursor.col = 1;
+      cursor.row++;
+    }
+
+    if (cursor.row > MAX_ROW) {
+      cursor.row = MAX_ROW;
+      var top_tr = tbody.children().slice(0, 1);
+      top_tr.remove();
+      var tr = $("<tr>");
+      buildRow(tr);
+      tbody.append(tr);
+    }
+  };
+
+
   var moveCursorUp = function(n) {
     cursor.row = Math.max(cursor.row - numerify(n), MIN_ROW)
   };
@@ -92,6 +109,12 @@ WEBHACK.create_screen = function (container_selector) {
   };
   var moveCursorForward = function(n) {
     cursor.col = Math.min(cursor.col + numerify(n), MAX_COL)
+  };
+
+  var lineFeed = function() {
+    cursor.col = 1;
+    cursor.row++;
+    wrapOrScrollIfNecessary();
   };
 
   jQuery.fn.erase = function() {
@@ -165,6 +188,9 @@ WEBHACK.create_screen = function (container_selector) {
       sgr_mode = 0
     }],
 
+    // Line Feed / Carriage Return
+    [/^(\u000A)/, lineFeed],
+
     // Unimplemented sequence: log and ignore.
     [/^(\u001B\[\??\d*;?\d*[a-zA-Z@`])/, function(x) {
       console.error("Unimplemented ANSI escape sequence: " + x)
@@ -174,7 +200,7 @@ WEBHACK.create_screen = function (container_selector) {
   var handleEscape = function(character) {
     var swallow_character = false;
 
-    if (character === "\u001B" || character === "\u0008") {
+    if (character === "\u001B" || character === "\u0008" || character === "\u000A") {
       escapeBuffer = "";
       escaping = true;
     }
@@ -211,19 +237,7 @@ WEBHACK.create_screen = function (container_selector) {
     if (sgr_mode === 0) removeClass("inverse", cursor.row, cursor.col);
 
     cursor.col++;
-    if (cursor.col > MAX_COL) {
-      cursor.col = 1;
-      cursor.row++;
-
-      if (cursor.row > MAX_ROW) {
-        cursor.row = MAX_ROW;
-        var top_tr = tbody.children().slice(0, 1);
-        top_tr.remove();
-        var tr = $("<tr>");
-        buildRow(tr);
-        tbody.append(tr);
-      }
-    }
+    wrapOrScrollIfNecessary();
   };
 
   var print = function(string) {
@@ -242,7 +256,7 @@ WEBHACK.create_screen = function (container_selector) {
   };
 
   build();
-  
+
   // interface ##################################
 
   var self = {};

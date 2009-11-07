@@ -23,7 +23,6 @@ class DuplexStreamAdapter
     upward_buffer = []
     downward_buffer = []
 
-    @eof = false
     i = 0
     while true
       begin
@@ -40,7 +39,8 @@ class DuplexStreamAdapter
         write_if_ready(@going_up, upward_buffer)
         write_if_ready(@going_down, downward_buffer)
 
-        # return if @eof
+      rescue Exception => e
+        logger.info e.inspect
       end
 
     end
