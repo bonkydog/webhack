@@ -2,7 +2,7 @@ WEBHACK.create_listener = function (uri){
 
   var $ = jQuery;
 
-  var LOG = false;
+  var LOG_CODES = false;
 
   var uri = uri;
   var ready_to_send = true;
@@ -12,9 +12,9 @@ WEBHACK.create_listener = function (uri){
 
   var convertKeypressToCharacter = function(event){
     var code = event.which;
-    if (LOG) console.log("code=" + code);
-    if (LOG) console.log("shift=" + event.shiftKey);
-    if (LOG) console.log("control=" + event.ctrlKey);
+    if (LOG_CODES) console.log("code=" + code);
+    if (LOG_CODES) console.log("shift=" + event.shiftKey);
+    if (LOG_CODES) console.log("control=" + event.ctrlKey);
 
     if ((code < 32 || code > 126 ) && code != 13 && code != 10) return "";
 

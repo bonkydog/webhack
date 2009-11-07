@@ -380,7 +380,7 @@ describe('screen', function () {
         $("table.screen td").html("x").addClass("inverse");
       });
 
-      describe("Erase in Display (ED) CSI code K", function () {
+      describe("Erase in Display (ED) CSI code J", function () {
 
         describe("Erase Below: CSI 0 J", function () {
           var test = function(message, code) {

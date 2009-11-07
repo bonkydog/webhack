@@ -4,6 +4,7 @@ WEBHACK.create_screen = function (container_selector) {
 
   // private ####################################
 
+  var LOG_UPDATES = false;
   var LOG_RENDERING = false;
 
   var MIN_ROW = 1;
@@ -124,7 +125,8 @@ WEBHACK.create_screen = function (container_selector) {
 
     // Erase in Display: Erase Below
     [/^\u001B\[0?J/, function() {
-      $("table.screen tr:gt(" + (cursor.row - 2) + ") td").erase()
+      $("table.screen tr:eq(" + (cursor.row - 1) + ") td").erase()
+      $("table.screen tr:gt(" + (cursor.row - 1) + ") td").erase()
     }],
 
     // Erase in Display: Erase Above
@@ -139,7 +141,8 @@ WEBHACK.create_screen = function (container_selector) {
 
     // Erase in Line: Erase to Right
     [/^\u001B\[0?K/, function() {
-      $("table.screen tr:eq(" + (cursor.row - 1) + ") td:gt(" + (cursor.col - 2) + ")").erase()
+      $("table.screen tr:eq(" + (cursor.row - 1) + ") td:eq(" + (cursor.col - 1) + ")").erase()
+      $("table.screen tr:eq(" + (cursor.row - 1) + ") td:gt(" + (cursor.col - 1) + ")").erase()
     }],
 
     // Erase in Line: Erase to Left
@@ -224,6 +227,7 @@ WEBHACK.create_screen = function (container_selector) {
   };
 
   var print = function(string) {
+    if (LOG_UPDATES) console.log(string);
     $.each($.makeArray(string.split('')), function(i, c) {
       writeCharacter(c);
     });
