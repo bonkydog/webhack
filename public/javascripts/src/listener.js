@@ -4,7 +4,6 @@ WEBHACK.create_listener = function (uri){
 
   var LOG_CODES = false;
 
-  var uri = uri;
   var ready_to_send = true;
   var move_buffer = "";
 
@@ -15,6 +14,9 @@ WEBHACK.create_listener = function (uri){
     if (LOG_CODES) console.log("code=" + code);
     if (LOG_CODES) console.log("shift=" + event.shiftKey);
     if (LOG_CODES) console.log("control=" + event.ctrlKey);
+    if (LOG_CODES) console.log("meta=" + event.metaKey);
+
+    if (event.metaKey) return "";
 
     if ((code < 32 || code > 126 ) && code != 13 && code != 10) return "";
 
@@ -81,7 +83,9 @@ WEBHACK.create_listener = function (uri){
   };
 
   var handleEvent = function(event){
-    move(convertKeypressToCharacter(event));
+    var character = convertKeypressToCharacter(event);
+    if (character === "") return true;
+    move(character);
     return false;
   };
 

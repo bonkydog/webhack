@@ -10,12 +10,13 @@ describe("listener", function () {
 
     listener = WEBHACK.create_listener("http://webhack.example.com:3000/games/1/dungeon");
 
-    event = function(which, shiftKey, ctrlKey) {
+    event = function(which, shiftKey, ctrlKey, metaKey) {
       which = $.isString(which) ? which.charCodeAt() : which;
       var self = {};
       self.which = which;
       self.shiftKey = !!shiftKey;
       self.ctrlKey = !!ctrlKey;
+      self.metaKey = !!metaKey;
       return self;
     };
 
@@ -97,10 +98,14 @@ describe("listener", function () {
 
     });
 
-
     it("should ignore the control-nonletter keys", function() {
       expect(listener.convertKeypressToCharacter(event("!", false, true))).toEqual("");
     });
+
+    it("should ignore meta-anything", function() {
+      expect(listener.convertKeypressToCharacter(event("r", false, false, true))).toEqual("");
+    });
+
   });
 
   describe("move", function () {
@@ -138,7 +143,7 @@ describe("listener", function () {
 
       expect($.post.callCount).toEqual(2); // now a PUT
 
-      second_args = $.post.argsForCall[1];
+      var second_args = $.post.argsForCall[1];
 
       expect(second_args[0]).toEqual("http://webhack.example.com:3000/games/1/dungeon");
       expect(second_args[1]).toEqual({"_method": "PUT", "move": "quack"});
@@ -156,9 +161,6 @@ describe("listener", function () {
     });
 
     it("should try to send again after 10 seconds if there's no response", function() {
-
-      var callback = args[2];
-
 
       expect($.post.callCount).toEqual(1); // no second PUT yet.
 

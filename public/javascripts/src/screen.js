@@ -96,7 +96,7 @@ WEBHACK.create_screen = function (container_selector) {
 
   jQuery.fn.erase = function() {
     this.html("").removeAttr("class");
-  }
+  };
 
   var ESCAPE_SEQUENCES = [
 
@@ -125,8 +125,8 @@ WEBHACK.create_screen = function (container_selector) {
 
     // Erase in Display: Erase Below
     [/^\u001B\[0?J/, function() {
-      $("table.screen tr:eq(" + (cursor.row - 1) + ") td").erase()
-      $("table.screen tr:gt(" + (cursor.row - 1) + ") td").erase()
+      $("table.screen tr:eq(" + (cursor.row - 1) + ") td").erase();
+      $("table.screen tr:gt(" + (cursor.row - 1) + ") td").erase();
     }],
 
     // Erase in Display: Erase Above
@@ -141,8 +141,8 @@ WEBHACK.create_screen = function (container_selector) {
 
     // Erase in Line: Erase to Right
     [/^\u001B\[0?K/, function() {
-      $("table.screen tr:eq(" + (cursor.row - 1) + ") td:eq(" + (cursor.col - 1) + ")").erase()
-      $("table.screen tr:eq(" + (cursor.row - 1) + ") td:gt(" + (cursor.col - 1) + ")").erase()
+      $("table.screen tr:eq(" + (cursor.row - 1) + ") td:eq(" + (cursor.col - 1) + ")").erase();
+      $("table.screen tr:eq(" + (cursor.row - 1) + ") td:gt(" + (cursor.col - 1) + ")").erase();
     }],
 
     // Erase in Line: Erase to Left
