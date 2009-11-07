@@ -50,6 +50,8 @@ class PtyFifoAdapter
     end
   rescue PTY::ChildExited
     logger.info("child exited.")
+  ensure
+    sleep 10 # give the controller time to pick up the last bit of output.
   end
 
 end

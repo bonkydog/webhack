@@ -24,6 +24,8 @@ class DuplexStreamAdapter
     downward_buffer = []
 
     i = 0
+    exception = nil
+    almost_done = false
     while true
       begin
         i += 1
@@ -41,7 +43,16 @@ class DuplexStreamAdapter
 
       rescue Exception => e
         logger.info e.inspect
+        exception = e
+      ensure
+        if almost_done
+          raise exception
+        end
+        if exception
+          almost_done = true
+        end
       end
+
 
     end
   end
