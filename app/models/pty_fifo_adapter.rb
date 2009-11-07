@@ -43,6 +43,7 @@ class PtyFifoAdapter
     going_up = File.open(@upward_fifo_path, File::WRONLY | File::EXCL | File::SYNC)
 
     ENV["TERM"] = "xterm"
+    ENV["SHELL"] = "/usr/bin/false"
     PTY.spawn(@command) do |coming_up, going_down|
       DuplexStreamAdapter.new(coming_down, coming_up, going_down, going_up).adapt
     end
