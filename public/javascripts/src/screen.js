@@ -1,4 +1,4 @@
-WEBHACK.screen = function (container_selector, my){
+WEBHACK.screen = function (container_selector){
 
   var $ = jQuery;
 
@@ -11,7 +11,6 @@ WEBHACK.screen = function (container_selector, my){
   var MAX_ROW = 25;
   var MAX_COL = 80;
 
-  var self;
   var cursor = {row: 1, col: 1};
   var container = $(container_selector).slice(0,1);
   var table;
@@ -185,14 +184,9 @@ WEBHACK.screen = function (container_selector, my){
     });
   };
 
-  my = my || {};
-
-  // protected ##################################
-  // (none yet -- add like this: my.foo = "blah";
-
-
   // interface ##################################
-  self = {};
+
+  var self = {};
 
   self.build = build;
   self.findCell = findCell;
