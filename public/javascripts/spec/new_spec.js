@@ -7,7 +7,7 @@ describe('screen', function () {
     $("#scratch").remove();
     $("body").append($("<div>").attr("id", "scratch"));
 
-    screen = WEBHACK.screen("#scratch");
+    screen = WEBHACK.create_screen("#scratch");
   });
 
   var CSI = "\u001B["; // ANSI Control Sequence Introducer

@@ -7,7 +7,7 @@ describe('screen', function () {
     $("#scratch").remove();
     $("body").append($("<div>").attr("id", "scratch"));
 
-    screen = WEBHACK.screen("#scratch");
+    screen = WEBHACK.create_screen("#scratch");
   });
 
   describe("construction", function () {
@@ -44,14 +44,15 @@ describe('screen', function () {
       });
 
       it("should throw an error when coordinates are out of bounds", function() {
-        [
+        $.each([
           [0,0],
           [0,5],
           [5,0],
           [5,81],
           [26,5],
           [26,80]
-        ].each(function(coordinates) {
+        ], function() {
+          var coordinates = this;
           var exception = undefined;
           try {
             screen.findCell(coordinates[0], coordinates[1]);
@@ -455,7 +456,7 @@ describe('screen', function () {
       });
 
     });
-    
+
 
     describe("unimplemented codes", function () {
       it("should ignore unimplemented codes and return to normal mode", function() {

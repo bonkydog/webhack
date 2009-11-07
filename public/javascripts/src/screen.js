@@ -1,4 +1,4 @@
-WEBHACK.screen = function (container_selector){
+WEBHACK.create_screen = function (container_selector){
 
   var $ = jQuery;
 
@@ -37,10 +37,7 @@ WEBHACK.screen = function (container_selector){
     }
   };
 
-
   build();
-
-  
 
   var getCursor = function (){
     return {row: cursor.row, col: cursor.col};
@@ -48,7 +45,7 @@ WEBHACK.screen = function (container_selector){
 
   var numerify = function(string_or_number) {
     if (string_or_number === "" || string_or_number === undefined) return 1; // lots of ANSI codes have arguments that default to 1 if missing.
-    return Object.isString(string_or_number) ? parseInt(string_or_number, 10) : string_or_number;
+    return $.isString(string_or_number) ? parseInt(string_or_number, 10) : string_or_number;
   };
 
   var setCursor = function(row, col){
@@ -140,13 +137,14 @@ WEBHACK.screen = function (container_selector){
       if (LOG_RENDERING) console.log("escaped character: ", character);
       swallow_character = true;
       escapeBuffer += character;
-      ESCAPE_SEQUENCES.each(function(mapping){
+      $.each(ESCAPE_SEQUENCES, function(){
+        var mapping = this;
         if (!escaping) return;
         var regex = mapping[0];
         var method = mapping[1];
         var match = regex.exec(escapeBuffer);
         if (match) {
-          var captured_groups = $A(match).slice(1);
+          var captured_groups = $.makeArray(match).slice(1);
           method.apply(null, captured_groups);
           escaping = false;
         }
@@ -179,7 +177,7 @@ WEBHACK.screen = function (container_selector){
   };
 
   var print = function(string){
-    string.toArray().each(function(c){
+    $.each($.makeArray(string.split('')), function(i, c){
       writeCharacter(c);
     });
   };
