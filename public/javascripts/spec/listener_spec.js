@@ -42,6 +42,48 @@ describe("listener", function () {
       expect(listener.convertKeypressToCharacter(event("\n", false))).toEqual("\n");
     });
 
+    it("should understand shifted number punctuations", function() {
+      expect(listener.convertKeypressToCharacter(event("1", true))).toEqual("!");
+      expect(listener.convertKeypressToCharacter(event("2", true))).toEqual("@");
+      expect(listener.convertKeypressToCharacter(event("3", true))).toEqual("#");
+      expect(listener.convertKeypressToCharacter(event("4", true))).toEqual("$");
+      expect(listener.convertKeypressToCharacter(event("5", true))).toEqual("%");
+      expect(listener.convertKeypressToCharacter(event("6", true))).toEqual("^");
+      expect(listener.convertKeypressToCharacter(event("7", true))).toEqual("&");
+      expect(listener.convertKeypressToCharacter(event("8", true))).toEqual("*");
+      expect(listener.convertKeypressToCharacter(event("9", true))).toEqual("(");
+      expect(listener.convertKeypressToCharacter(event("0", true))).toEqual(")");
+    });
+
+    it("should understand punctuation marks", function() {
+      expect(listener.convertKeypressToCharacter(event("`", false))).toEqual("`");
+      expect(listener.convertKeypressToCharacter(event("-", false))).toEqual("-");
+      expect(listener.convertKeypressToCharacter(event("=", false))).toEqual("=");
+      expect(listener.convertKeypressToCharacter(event("[", false))).toEqual("[");
+      expect(listener.convertKeypressToCharacter(event("]", false))).toEqual("]");
+      expect(listener.convertKeypressToCharacter(event(";", false))).toEqual(";");
+      expect(listener.convertKeypressToCharacter(event(",", false))).toEqual(",");
+      expect(listener.convertKeypressToCharacter(event(".", false))).toEqual(".");
+      expect(listener.convertKeypressToCharacter(event("\\", false))).toEqual("\\");
+      expect(listener.convertKeypressToCharacter(event(" ", false))).toEqual(" ");
+
+    });
+
+    it("should understand shifted punctuation marks", function() {
+      expect(listener.convertKeypressToCharacter(event("`", true))).toEqual("~");
+      expect(listener.convertKeypressToCharacter(event("-", true))).toEqual("_");
+      expect(listener.convertKeypressToCharacter(event("=", true))).toEqual("+");
+      expect(listener.convertKeypressToCharacter(event("[", true))).toEqual("{");
+      expect(listener.convertKeypressToCharacter(event("]", true))).toEqual("}");
+      expect(listener.convertKeypressToCharacter(event(";", true))).toEqual(":");
+      expect(listener.convertKeypressToCharacter(event(",", true))).toEqual("<");
+      expect(listener.convertKeypressToCharacter(event(".", true))).toEqual(">");
+      expect(listener.convertKeypressToCharacter(event("\\", true))).toEqual("|");
+
+    });
+
+    
+
     it("should understand the control-letter keys", function() {
       expect(listener.convertKeypressToCharacter(event("A", false, true))).toEqual("\u0001");
       expect(listener.convertKeypressToCharacter(event("Z", false, true))).toEqual("\u001A");

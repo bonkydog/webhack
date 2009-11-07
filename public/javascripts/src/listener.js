@@ -21,14 +21,39 @@ WEBHACK.create_listener = function (uri){
     if (!event.shiftKey) {
       if (code >= 65 && code <= 90) code = code + 32;
     }
-
     if (event.ctrlKey) {
       if (code >= 65 && code <= 90) code = code - 64;
       else if (code >= 97 && code <= 122) code = code - 96;
       else return "";
     }
 
-    return String.fromCharCode(code);
+    var character = String.fromCharCode(code);
+
+    if (event.shiftKey) {
+      switch (character) {
+        case "1" : return "!";
+        case "2" : return "@";
+        case "3" : return "#";
+        case "4" : return "$";
+        case "5" : return "%";
+        case "6" : return "^";
+        case "7" : return "&";
+        case "8" : return "*";
+        case "9" : return "(";
+        case "0" : return ")";
+        case "`" : return "~";
+        case "-" : return "_";
+        case "=" : return "+";
+        case "[" : return "{";
+        case "]" : return "}";
+        case ";" : return ":";
+        case "," : return "<";
+        case "." : return ">";
+        case "/" : return "?";
+        case "\\" : return "|";
+      }
+    }
+    return character;
   };
 
   var callback = function(){
@@ -57,7 +82,10 @@ WEBHACK.create_listener = function (uri){
 
   var handleEvent = function(event){
     move(convertKeypressToCharacter(event));
+    return false;
   };
+
+
 
   var start = function(){
     $().bind("keydown", handleEvent);
