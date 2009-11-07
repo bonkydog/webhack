@@ -1,4 +1,8 @@
 ActionController::Routing::Routes.draw do |map|
+
+
+  map.root :controller => :home
+
   map.resources :games do |game|
     game.resource :dungeon, :only => [:update]
   end
