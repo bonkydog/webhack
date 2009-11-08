@@ -1,4 +1,4 @@
-class DungeonsController < ActionController::Base
+class DungeonsController < ApplicationController
 
   def update
     @game = Game.find(params[:game_id])
@@ -12,6 +12,5 @@ class DungeonsController < ActionController::Base
     end
 
   end
-
 
 end

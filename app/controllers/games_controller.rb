@@ -1,4 +1,5 @@
 class GamesController < ApplicationController
+  before_filter :require_user
 
   # GET /games
   def index
@@ -25,12 +26,10 @@ class GamesController < ApplicationController
     @game = Game.new(params[:game])
     @game.start
     if @game.save
-      flash[:notice] = 'Game was successfully created.'
       redirect_to :action => "show", :id => @game.id
     else
       render :action => "new"
     end
-
   end
 
   # PUT /games/1

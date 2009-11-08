@@ -1,0 +1,15 @@
+
+%h1.title WebHack
+
+.login-form
+  - form_for @user_session, :url => user_session_path do |f|
+    .login
+      = f.label :login
+      = f.text_field :login, :class => :text
+    .password
+      = f.label :password
+      = f.password_field :password, :class => :text
+    .controls
+      = f.submit "Login"
+      = f.label :remember_me
+      = f.check_box :remember_me

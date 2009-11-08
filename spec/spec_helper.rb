@@ -9,6 +9,8 @@ require 'rr'
 
 require 'shoulda'
 
+require 'authlogic/test_case'
+
 # Requires supporting files with custom matchers and macros, etc,
 # in ./support/ and its subdirectories.
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
@@ -67,6 +69,11 @@ shared_examples_for "a timestamped model" do
       should have_db_column(:updated_at).of_type(:datetime).with_options(:null => false)
     end
   end
+end
+
+def login_as(user)
+  activate_authlogic
+  UserSession.create!(:login => user.login, :password => "cockatrice")
 end
 
 

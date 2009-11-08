@@ -13,3 +13,10 @@ Factory.define(:game) do |f|
   f.pid { Factory.next(:pid) }
   f.transcript {"I had an adventure."}
 end
+
+Factory.define(:user) do |f|
+  f.login "bob"
+  f.email "bob@example.com"
+  f.password "cockatrice"
+  f.password_confirmation "cockatrice"
+end

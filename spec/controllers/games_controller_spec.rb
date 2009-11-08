@@ -2,10 +2,34 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 require File.expand_path(File.dirname(__FILE__) + '/../helpers/resource_spec_helper')
 describe GamesController do
 
-  it_should_behave_like "a restfully routed resource"
+
+  describe "routes" do
+    before do
+      @resource_name = "games"
+      @resource_symbol = @resource_name.to_sym
+    end
+
+    it_should_behave_like "a restfully routed resource"
+
+  end
+
+
+  describe "authentication" do
+    before do
+      @game = Factory(:game)
+    end
+
+    it "should require authentication" do
+      get :show, :id => @game
+      response.should redirect_to "/"
+    end
+  end
 
   describe "actions" do
     before do
+      login_as Factory(:user)
+
+
       @game = Factory(:game)
       @other_game= Factory(:game)
       @good_attributes = HashWithIndifferentAccess.new(Factory.attributes_for(:game))
@@ -27,6 +51,7 @@ describe GamesController do
       before do
         it "should fetch and assign all games for listing" do
           get :index
+          response.should be_success
           assigns(:games).should =~ [@game, @other_game]
         end
       end
@@ -35,14 +60,16 @@ describe GamesController do
     describe "#show" do
       it "should fetch and assign the game for display" do
         get :show, :id => @game.id
+        response.should be_success
         assigns(:game).should == @game
       end
     end
 
 
     describe "#new" do
-      it "should fetch and assign a new game to fill in" do
+      it "should create and assign a new game to fill in" do
         get :new
+        response.should be_success
         assigns(:game).should be_a(Game)
         assigns(:game).should be_new_record
       end
@@ -51,6 +78,7 @@ describe GamesController do
     describe "#edit" do
       it "should fetch and assign the game to edit" do
         get :edit, :id => @game.id
+        response.should be_success
         assigns(:game).should == @game
       end
     end
@@ -78,13 +106,6 @@ describe GamesController do
         it "should redirect to show the new game" do
           response.should redirect_to(game_url(assigns[:game].id))
         end
-
-        it "should flash a notice" do
-          puts assigns[:game].errors.full_messages
-          puts assigns[:game].pid
-          pp Game.find_by_pid(assigns[:game].pid)
-          flash[:notice].should =~ /created/
-        end
       end
 
       context "with invalid game" do
@@ -101,10 +122,9 @@ describe GamesController do
           assigns(:game).should be_new_record
         end
 
-        it "should render edit" do
+        it "should render new" do
           response.should render_template(:new)
         end
-
       end
 
     end

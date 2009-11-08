@@ -1,12 +1,11 @@
 ActionController::Routing::Routes.draw do |map|
 
-
-  map.root :controller => :home
+  map.resource :user_session
+  map.root :controller => "user_sessions", :action => "new" # optional, this just sets the root route
 
   map.resources :games do |game|
     game.resource :dungeon, :only => [:update]
   end
-  
 
   # The priority is based upon order of creation: first created -> highest priority.
 
