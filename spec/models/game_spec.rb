@@ -7,6 +7,10 @@ describe Game do
 
   describe "schema" do
 
+    it "should belong to a user" do
+      should belong_to :user
+    end
+
     it "should have a name  field" do
       should have_db_column(:name).of_type(:string).with_options(:null => false)
     end

@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20091107232733) do
+ActiveRecord::Schema.define(:version => 20091108183324) do
 
   create_table "games", :force => true do |t|
     t.string   "name",       :null => false
@@ -17,6 +17,7 @@ ActiveRecord::Schema.define(:version => 20091107232733) do
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
     t.text     "transcript"
+    t.integer  "user_id",    :null => false
   end
 
   add_index "games", ["pid"], :name => "index_games_on_pid", :unique => true

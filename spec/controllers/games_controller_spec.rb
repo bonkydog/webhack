@@ -1,15 +1,24 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
-require File.expand_path(File.dirname(__FILE__) + '/../helpers/resource_spec_helper')
 describe GamesController do
 
 
   describe "routes" do
-    before do
-      @resource_name = "games"
-      @resource_symbol = @resource_name.to_sym
+
+    it "should route to restful show" do
+      should route(:get, "/games/1").to(:controller => :games, :action => :show, :id => 1)
     end
 
-    it_should_behave_like "a restfully routed resource"
+    it "should route to restful new" do
+      should route(:get, "/games/new").to(:controller => :games, :action => :new)
+    end
+
+    it "should route to restful create" do
+      should route(:post, "/games").to(:controller => :games, :action => :create)
+    end
+
+    it "should route to restful update" do
+      should route(:put, "/games/1").to(:controller => :games, :action => :update, :id => 1)
+    end
 
   end
 
@@ -47,16 +56,6 @@ describe GamesController do
     end
 
 
-    describe "#index" do
-      before do
-        it "should fetch and assign all games for listing" do
-          get :index
-          response.should be_success
-          assigns(:games).should =~ [@game, @other_game]
-        end
-      end
-    end
-
     describe "#show" do
       it "should fetch and assign the game for display" do
         get :show, :id => @game.id
@@ -64,7 +63,6 @@ describe GamesController do
         assigns(:game).should == @game
       end
     end
-
 
     describe "#new" do
       it "should create and assign a new game to fill in" do
@@ -74,15 +72,6 @@ describe GamesController do
         assigns(:game).should be_new_record
       end
     end
-
-    describe "#edit" do
-      it "should fetch and assign the game to edit" do
-        get :edit, :id => @game.id
-        response.should be_success
-        assigns(:game).should == @game
-      end
-    end
-
 
     describe "#create" do
       before do
@@ -128,60 +117,6 @@ describe GamesController do
       end
 
     end
-
-
-    describe "#update" do
-      context "with valid game" do
-        before do
-          put :update, :id => @game.id, :game => @good_attributes
-        end
-
-        it "should not update the record" do
-          @game.reload.attributes.without_automatic_fields.should == @good_attributes.without_automatic_fields
-        end
-
-        it "should redirect to the games index" do
-          response.should redirect_to(:action => "index")
-        end
-
-        it "should flash a notice" do
-          flash[:notice].should_not be_nil
-        end
-      end
-
-      context "with invalid game" do
-        before do
-          put :update, :id => @game.id, :game => @bad_attributes
-        end
-
-        it "should not update the record" do
-          @game.reload.attributes.without_automatic_fields.should_not == @bad_attributes.without_automatic_fields
-        end
-
-        it "should assign game for correction" do
-          assigns(:game).should == @game
-        end
-
-        it "should render edit" do
-          response.should render_template(:edit)
-        end
-      end
-    end
-
-    describe "#destroy" do
-      before do
-        delete :destroy, :id => @game.id
-      end
-
-      it "should delete the game" do
-        Game.find_by_id(@game.id).should be_nil
-      end
-
-      it "should redirect to to games index" do
-        response.should redirect_to(:action => "index")
-      end
-    end
-
 
   end
 end

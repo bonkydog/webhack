@@ -2,6 +2,8 @@ class Game < ActiveRecord::Base
 
   include Multiplex
 
+  belongs_to :user
+
   #####################################################################
   # validations  
 
