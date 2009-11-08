@@ -4,14 +4,14 @@ describe DungeonsController do
   describe "subresource routes" do
 
     it "should route to restful update" do
-      should route(:put, "/games/1/dungeon").to(:controller => :dungeons, :action => :update, :game_id => 1)
+      should route(:put, "/game/dungeon").to(:controller => :dungeons, :action => :update)
     end
 
   end
 
   describe "actions" do
     before do
-      @game = Factory(:game, :transcript => nil)
+      @game = Factory(:game)
     end
 
     describe "#update" do

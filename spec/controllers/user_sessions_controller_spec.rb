@@ -61,8 +61,8 @@ describe UserSessionsController do
           session.user.should == @user
         end
 
-        it "should redirect to the new game page" do
-          response.should redirect_to(new_game_url)
+        it "should redirect to the game show page" do
+          response.should redirect_to(game_url)
         end
 
       end

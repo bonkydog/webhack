@@ -75,7 +75,7 @@ WEBHACK.create_listener = function (uri){
     if (move_buffer === "") return; 
     if (ready_to_send) {
       $().stopTime("webhack listener");
-      $.post(uri, { _method : 'PUT', move : move_buffer }, callback, 'script');
+      $.post(uri, { _method : 'PUT', move : move_buffer, authenticity_token: $('#authenticity_token').val()}, callback, 'script');
       ready_to_send = false;
       move_buffer = "";
       $().oneTime(10000, "webhack listener", timeout);

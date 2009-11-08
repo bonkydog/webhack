@@ -4,11 +4,9 @@
 .login-form
   - form_for @user_session, :url => user_session_path do |f|
     .login
-      = f.label :login
-      = f.text_field :login, :class => :text
+      = f.labelled_text_field "Login", :login, :class => "focus"
     .password
-      = f.label :password
-      = f.password_field :password, :class => :text
+      = f.labelled_password_field  "Password", :password
     .controls
       = f.submit "Login"
       = f.label :remember_me

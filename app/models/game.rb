@@ -7,7 +7,6 @@ class Game < ActiveRecord::Base
   #####################################################################
   # validations  
 
-  validates_presence_of :name
   validates_numericality_of :pid
   validates_uniqueness_of :pid
 
@@ -55,6 +54,7 @@ class Game < ActiveRecord::Base
     self.pid = fork do
       exec "nohup #{command} > /dev/null &" # this is a crap way to do this.
     end
+    Process.detach(self.pid)
     sleep 0.5
   end
 

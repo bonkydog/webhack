@@ -8,19 +8,7 @@ jQuery(document).ready(function($) {
     }
   });
 
-  $.fn.submitWithAjax = function() {
-    this.submit(function() {
-      $.post(this.action, $(this).serialize(), null, "script");
-      return false;
-    });
-    return this;
-  };
-
-
-  $("form.ajax").submitWithAjax();
-  $(".no-autocomplete").attr("autocomplete", "off");
-
-
+  $(".focus").slice(0,1).focus();
 
   var buffer = "";
   var ok_to_send = true;
@@ -28,7 +16,7 @@ jQuery(document).ready(function($) {
   if ($("div.screen-container").size() > 0) {
     WEBHACK.screen = WEBHACK.create_screen("div.screen-container");
 
-    WEBHACK.listener = WEBHACK.create_listener("http://localhost:3000/games/4/dungeon");
+    WEBHACK.listener = WEBHACK.create_listener("http://localhost:3000/game/dungeon");
     WEBHACK.listener.start();
     WEBHACK.listener.move("\u0012"); // control-R.  asks nethack to redraw the screen.
   }

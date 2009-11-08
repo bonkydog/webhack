@@ -1,7 +1,8 @@
 class DungeonsController < ApplicationController
+  before_filter :require_user
 
   def update
-    @game = Game.find(params[:game_id])
+    @game = Game.find_by_user_id(current_user.id)
 
     move = params[:move]
 

@@ -1,26 +1,13 @@
 class GamesController < ApplicationController
   before_filter :require_user
 
-
-  # GET /games/1
   def show
-    @game = Game.find(params[:id])
-  end
-  
-  # GET /games/new
-  def new
-    @game = Game.new
-  end
-
-  # POST /games
-  def create
-    @game = Game.new(params[:game])
-    @game.start
-    if @game.save
-      redirect_to :action => "show", :id => @game.id
-    else
-      render :action => "new"
+    @game = Game.find_by_user_id(current_user.id)
+    unless @game
+      @game = Game.new(:user_id => current_user.id)
+      @game.start
+      @game.save!
     end
   end
-
+  
 end

@@ -12,11 +12,9 @@
 ActiveRecord::Schema.define(:version => 20091108183324) do
 
   create_table "games", :force => true do |t|
-    t.string   "name",       :null => false
     t.integer  "pid",        :null => false
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
-    t.text     "transcript"
     t.integer  "user_id",    :null => false
   end
 
