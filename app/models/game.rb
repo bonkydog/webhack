@@ -51,7 +51,7 @@ class Game < ActiveRecord::Base
     command = "#{adapter} #{game} #{fifo_name(:down)} #{fifo_name(:up)}"
     puts command
     self.pid = fork do
-      exec "nohup #{command} &" # this is a crap way to do this.
+      exec "nohup #{command} > /dev/null &" # this is a crap way to do this.
     end
     sleep 0.5
   end
