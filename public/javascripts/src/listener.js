@@ -2,7 +2,7 @@ WEBHACK.create_listener = function (uri){
 
   var $ = jQuery;
 
-  var LOG_CODES = true;
+  var LOG_CODES = false;
 
   var ready_to_send = true;
   var move_buffer = "";
