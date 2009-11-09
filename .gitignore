@@ -19,3 +19,4 @@ db/*.sqlite*
 
 # ignore (sass-generated) css
 public/stylesheets/*.css
+config/deploy.rb
