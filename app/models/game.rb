@@ -1,67 +1,114 @@
-class Game < ActiveRecord::Base
+class Game
 
   include Multiplex
 
-  belongs_to :user
+
+  def initialize(user)
+    @user = user
+  end
 
   #####################################################################
-  # validations  
-
-  validates_numericality_of :pid
-  validates_uniqueness_of :pid
-
-  attr_protected :pid
-
-  #####################################################################
-  # fifo management
-
-  DIRECTIONS = [:up, :down]
+  # stub/mock hooks
 
   def self.game_fifo_dir
     Dir.tmpdir
   end
+
+  def self.backtick(command)
+    `#{command}`
+  end
+
+  def self.fork_and_exec(command)
+    pid = fork do
+      exec(command)
+    end
+    Process.detach(pid)
+    pid
+  end
+
+  #####################################################################
+  # fifo management
+
 
   def self.make_fifo(fifo_path)
     `mkfifo #{fifo_path}`
   end
 
   def fifo_name(direction)
-    raise ArgumentError unless DIRECTIONS.include?(direction)
-    File.join("/tmp", "#{direction}ward")
-#    File.join(Game.game_fifo_dir, "#{direction}ward_fifo_#{id}_#{pid}")
+    File.join(Game.game_fifo_dir, "#{direction}ward_fifo_#{@user.id}")
+  end
+
+  def downward_fifo_name
+    fifo_name("down")
+  end
+
+  def upward_fifo_name
+    fifo_name("up")
   end
 
   def make_fifos
-    DIRECTIONS.each do |direction|
-      Game.make_fifo(fifo_name(direction))
+    [downward_fifo_name, upward_fifo_name].each do |fifo_name|
+      Game.make_fifo(fifo_name)
     end
   end
 
   def unlink_fifos
-    DIRECTIONS.each do |direction|
-      FileUtils.rm(fifo_name(direction))
+    [downward_fifo_name, upward_fifo_name].each do |fifo_name|
+      FileUtils.rm(fifo_name)
     end
+  end
+
+  def pid
+    regexp = /\s*(\d+).*pty_fifo_adapter.*-u "#{@user.login}".*/
+    found = regexp.match(Game.backtick("ps -eo pid,command"))
+    return nil unless found
+    found[1].to_i
+  end
+
+  def run
+    return pid if  pid
+
+    make_fifos
+
+    game = %[/opt/local/bin/nethack -u "#{@user.login}"]
+    adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
+    process = "#{adapter} '#{game}' #{downward_fifo_name} #{upward_fifo_name}"
+    command = "nohup #{process} > /dev/null &"
+    puts command
+
+    Game.fork_and_exec command
+    sleep 1
   end
 
   # SPIKE
-  def start
-    make_fifos
-
-    game = "/opt/local/bin/nethack"
-    adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
-    command = "#{adapter} #{game} #{fifo_name(:down)} #{fifo_name(:up)}"
-    puts command
-    self.pid = fork do
-      exec "nohup #{command} > /dev/null &" # this is a crap way to do this.
+  def move (input)
+    incoming_buffer = ""
+    outgoing_buffer = input.bytes.to_a
+    File.open(downward_fifo_name, File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |down|
+      File.open(upward_fifo_name, File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
+        write(down, outgoing_buffer)
+        incoming_buffer = read(incoming_buffer, up)
+      end
     end
-    Process.detach(self.pid)
-    sleep 0.5
+    incoming_buffer
   end
+
+  def look
+    incoming_buffer = ""
+    File.open(downward_fifo_name, File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do
+      File.open(upward_fifo_name, File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
+        incoming_buffer = read(incoming_buffer, up)
+      end
+    end
+    incoming_buffer
+  end
+
+  private
 
   # SPIKE
   def write(down, outgoing_buffer)
     outgoing_buffer.each do |c|
-      while !IO.select(nil, [down], nil, 0)
+      while !IO.select(nil, [down], nil, 0.1)
         puts "whuuut?"
       end
       down.syswrite(c.chr)
@@ -78,20 +125,6 @@ class Game < ActiveRecord::Base
     return incoming_buffer
   rescue Exception => e
     logger.info e.inspect
-  end
-
-  # SPIKE
-  def move_and_look(input)
-    incoming_buffer = ""
-    outgoing_buffer = input.bytes.to_a
-    File.open(fifo_name(:down), File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |down|
-      File.open(fifo_name(:up), File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
-        write(down, outgoing_buffer)
-
-        incoming_buffer = read(incoming_buffer, up)
-      end
-    end
-    incoming_buffer
   end
 
 

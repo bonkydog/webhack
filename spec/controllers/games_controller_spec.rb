@@ -13,7 +13,8 @@ describe GamesController do
 
   describe "authentication" do
     before do
-      @game = Factory(:game)
+      @user = Factory(:user)
+      @game = Game.new(@user)
     end
 
     it "should require authentication" do
@@ -25,8 +26,10 @@ describe GamesController do
   describe "actions" do
     before do
       @user = Factory(:user)
-      @game = Factory(:game, :user => @user)
       login_as @user
+      stub.proxy(Game).new do |game|
+        @game = game
+      end
     end
 
     describe "#show" do

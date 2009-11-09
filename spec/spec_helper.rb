@@ -74,6 +74,7 @@ end
 def login_as(user)
   activate_authlogic
   UserSession.create!(:login => user.login, :password => "cockatrice")
+  user.reload
 end
 
 

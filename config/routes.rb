@@ -5,7 +5,7 @@ ActionController::Routing::Routes.draw do |map|
   map.resource :user_session
 
   map.resource :game, :only => [:show] do |game|
-    game.resource :dungeon, :only => [:update]
+    game.resource :dungeon, :only => [:show, :update]
   end
 
 end

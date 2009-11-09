@@ -5,109 +5,156 @@ require "uuid"
 describe Game do
 
 
-  describe "schema" do
 
-    it "should belong to a user" do
-      should belong_to :user
+  before do
+    @test_temp_dir = FileUtils.mkdir_p(File.join(Dir.tmpdir, "webhack_test_dir_#{UUID.generate}"))
+    stub(Game).game_fifo_dir { @test_temp_dir }
+    @user = Factory(:user)
+    @game = Game.new(@user)
+  end
+
+  after do
+    FileUtils.rm_rf(@test_temp_dir)
+  end
+
+  describe "#downward_fifo_name" do
+    it "should generate an downward fifo name" do
+      @game.downward_fifo_name.should == "#{@test_temp_dir}/downward_fifo_#{@user.id}"
+    end
+  end
+
+  describe "#upward_fifo_name" do
+    it "should generate an upward fifo name" do
+      @game.upward_fifo_name.should == "#{@test_temp_dir}/upward_fifo_#{@user.id}"
+    end
+  end
+
+  describe "#make_fifo" do
+    it "should make a fifo" do
+      fifo_path = File.join(@test_temp_dir, "i_am_a_fifo")
+      Game.make_fifo(fifo_path)
+      `ls -l #{fifo_path}`.should =~ /^p/
+    end
+  end
+
+  describe "#make_fifos" do
+    it "should make and upward and downward fifos" do
+      @game.make_fifos
+      `ls -l #{@game.downward_fifo_name}`.should =~ /^p/
+      `ls -l #{@game.upward_fifo_name}`.should =~ /^p/
+    end
+  end
+
+  describe "#unlink_fifos" do
+    it "should unlink the upward and downward fifos" do
+      @game.make_fifos
+      @game.unlink_fifos
+
+      File.exist?(@game.downward_fifo_name).should be_false
+      File.exist?(@game.upward_fifo_name).should be_false
+    end
+  end
+
+  describe "pid" do
+
+    context "when the game is running" do
+      before do
+        simulate_game_running
+      end
+
+      it "should eturn the pid of the game process" do
+        @game.pid.should == 13013
+      end
     end
 
-    it "should have a pid field" do
-      should have_db_column(:pid).of_type(:integer).with_options(:null => false)
+    context "when the game not running" do
+      before do
+        simulate_game_not_running
+      end
+
+      it "should return the pid of the game process" do
+        @game.pid.should be_nil
+      end
     end
 
-    it "should index the pid field" do
-      should have_db_index(:pid).unique(true)
-    end
-
-    it_should_behave_like "a timestamped model"
 
   end
 
+  describe "run" do
+    context "when the game is running" do
+      before do
+        simulate_game_running
+      end
 
-  describe "validations" do
-
-    before do
-      @game = Factory(:game)
+      it "should not start a new game process" do
+        dont_allow(Game).fork_and_exec
+        @game.run
+      end
     end
 
-    it "should be valid fresh from the factory" do
-      @game.should be_valid
-    end
+    context "when the game not running" do
+      before do
+        simulate_game_not_running
+        stub(Game).fork_and_exec(anything) {13013}
+        @game.run
+      end
 
-    it "should require a numeric pid" do
-      should validate_numericality_of :pid
-    end
+      it "should make the fifos" do
+        `ls -l #{@game.downward_fifo_name}`.should =~ /^p/
+        `ls -l #{@game.upward_fifo_name}`.should =~ /^p/
+      end
 
-    it "should require pid to be unique" do
-      should validate_uniqueness_of :pid
+
+      it "should start a new game process" do
+        Game.should have_received.fork_and_exec(%r[pty_fifo_adapter])
+      end
+      
+    end
+  end
+
+
+  describe "move_and_look" do
+    it "should be tested" do
+      pending
+    end
+  end
+
+  describe "read" do
+    it "should be tested" do
+      pending
     end
 
   end
 
-  describe "mass assignment" do
-
-    it "should not assign pid" do
-      should_not allow_mass_assignment_of(:pid)
+  describe "write" do
+    it "should be tested" do
+      pending
     end
-
   end
 
-  describe "game handing" do
 
-    before do
-      @test_temp_dir = FileUtils.mkdir_p(File.join(Dir.tmpdir, "webhack_test_dir_#{UUID.generate}"))
-      stub(Game).game_fifo_dir { @test_temp_dir }
-      @game = Factory(:game)
-      @game.id = 17
-      @game.pid = 23
-    end
+  ######################################
 
-    after do
-      FileUtils.rm_rf(@test_temp_dir)
-    end
 
-    describe "#fifo_name" do
-      it "should generate an downward fifo name" do
-        @game.fifo_name(:down).should == "/tmp/downward"
-        #@game.fifo_name(:down).should == "#{@test_temp_dir}/downward_fifo_17_23"
-      end
-
-      it "should generate an upward fifo name" do
-        @game.fifo_name(:up).should == "/tmp/upward"
-        # @game.fifo_name(:up).should == "#{@test_temp_dir}/upward_fifo_17_23"
-      end
-
-      it "should not generate bogus fifo names" do
-        lambda { @game.fifo_name(:bed) }.should raise_error(ArgumentError)
-      end
-    end
-
-    describe "#make_fifo" do
-      it "should make a fifo" do
-        fifo_path = File.join(@test_temp_dir, "i_is_a_fifo")
-        Game.make_fifo(fifo_path)
-        `ls -l #{fifo_path}`.should =~ /^p/
-      end
-    end
-
-    describe "#make_fifos" do
-      it "should make and upward and downward fifos" do
-        @game.make_fifos
-        `ls -l #{@game.fifo_name(:down)}`.should =~ /^p/
-        `ls -l #{@game.fifo_name(:up)}`.should =~ /^p/
-      end
-    end
-
-    describe "#unlink_fifos" do
-      it "should unlink the upward and downward fifos" do
-        @game.make_fifos
-        @game.unlink_fifos
-
-        File.exist?(@game.fifo_name(:down)).should be_false
-        File.exist?(@game.fifo_name(:up)).should be_false
-      end
-    end
-
+  def fake_output(game_process_line)
+    fake_output = <<-OUT
+PID COMMAND
+1 /sbin/launchd
+ 10 /usr/libexec/kextd
+ 11 /usr/sbin/notifyd
+ 12 /usr/sbin/syslogd
+#{game_process_line}55555 destroy_everything.rb'
+    OUT
   end
+
+  def simulate_game_running
+    game_process_line = %[13013 pty_fifo_adapter.rb 'nethack -u "#{@user.login}"'\n]
+    stub(Game).backtick("ps -eo pid,command") {fake_output(game_process_line)}
+  end
+
+  def simulate_game_not_running
+    stub(Game).backtick("ps -eo pid,command") {fake_output("")}
+  end
+
 
 end

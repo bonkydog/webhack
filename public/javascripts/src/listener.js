@@ -2,7 +2,7 @@ WEBHACK.create_listener = function (uri){
 
   var $ = jQuery;
 
-  var LOG_CODES = false;
+  var LOG_CODES = true;
 
   var ready_to_send = true;
   var move_buffer = "";
@@ -16,7 +16,7 @@ WEBHACK.create_listener = function (uri){
     if (LOG_CODES) console.log("control=" + event.ctrlKey);
     if (LOG_CODES) console.log("meta=" + event.metaKey);
 
-    if (event.metaKey) return "";
+    if (event.metaKey && !event.ctrlKey) return "";
 
     if ((code < 32 || code > 126 ) && code != 13 && code != 10) return "";
 
@@ -72,7 +72,7 @@ WEBHACK.create_listener = function (uri){
 
   var move = function(move){
     move_buffer += move;
-    if (move_buffer === "") return; 
+    if (move_buffer === "") return;
     if (ready_to_send) {
       $().stopTime("webhack listener");
       $.post(uri, { _method : 'PUT', move : move_buffer, authenticity_token: $('#authenticity_token').val()}, callback, 'script');
