@@ -193,7 +193,7 @@ WEBHACK.create_screen = function (container_selector) {
 
     // Unimplemented sequence: log and ignore.
     [/^(\u001B\[\??\d*;?\d*[a-zA-Z@`])/, function(x) {
-      console.error("Unimplemented ANSI escape sequence: " + x)
+      $.log("Unimplemented ANSI escape sequence: " + x)
     }]
   ];
 
@@ -206,7 +206,7 @@ WEBHACK.create_screen = function (container_selector) {
     }
 
     if (escaping) {
-      if (LOG_RENDERING) console.log("escaped character: ", character);
+      if (LOG_RENDERING) $.log("escaped character: ", character);
       swallow_character = true;
       escapeBuffer += character;
       $.each(ESCAPE_SEQUENCES, function() {
@@ -229,7 +229,7 @@ WEBHACK.create_screen = function (container_selector) {
   var writeCharacter = function(character) {
 
     if (handleEscape(character)) return;
-    if (LOG_RENDERING) console.log("rendered character: ", character);
+    if (LOG_RENDERING) $.log("rendered character: ", character);
 
     putCharacter(character, cursor.row, cursor.col);
 
@@ -241,7 +241,7 @@ WEBHACK.create_screen = function (container_selector) {
   };
 
   var print = function(string) {
-    if (LOG_UPDATES) console.log(string);
+    if (LOG_UPDATES) $.log(string);
     $.each($.makeArray(string.split('')), function(i, c) {
       writeCharacter(c);
     });

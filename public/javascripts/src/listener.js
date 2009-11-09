@@ -11,10 +11,10 @@ WEBHACK.create_listener = function (uri){
 
   var convertKeypressToCharacter = function(event){
     var code = event.which;
-    if (LOG_CODES) console.log("code=" + code);
-    if (LOG_CODES) console.log("shift=" + event.shiftKey);
-    if (LOG_CODES) console.log("control=" + event.ctrlKey);
-    if (LOG_CODES) console.log("meta=" + event.metaKey);
+    if (LOG_CODES) $.log("code=" + code);
+    if (LOG_CODES) $.log("shift=" + event.shiftKey);
+    if (LOG_CODES) $.log("control=" + event.ctrlKey);
+    if (LOG_CODES) $.log("meta=" + event.metaKey);
 
     if (event.metaKey && !event.ctrlKey) return "";
 
@@ -65,7 +65,7 @@ WEBHACK.create_listener = function (uri){
 
 
   var timeout = function(){
-    console.error("timed out waiting for response");
+    $.log("timed out waiting for response");
     callback();
   };
 
