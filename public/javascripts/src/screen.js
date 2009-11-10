@@ -1,16 +1,18 @@
-WEBHACK.create_screen = function (container_selector) {
+WEBHACK.create_screen = function (container_selector, options) {
+
+  options = options || {};
 
   var $ = jQuery;
 
   // private ####################################
 
-  var LOG_UPDATES = false;
-  var LOG_RENDERING = false;
-
   var MIN_ROW = 1;
   var MIN_COL = 1;
   var MAX_ROW = 25;
   var MAX_COL = 80;
+
+  var log_updates = options.log_updates;
+  var log_rendering =  options.log_rendering;
 
   var cursor = {row: 1, col: 1};
   var container = $(container_selector).slice(0, 1);
@@ -206,7 +208,7 @@ WEBHACK.create_screen = function (container_selector) {
     }
 
     if (escaping) {
-      if (LOG_RENDERING) $.log("escaped character: ", character);
+      if (log_rendering) $.log("escaped character: ", character);
       swallow_character = true;
       escapeBuffer += character;
       $.each(ESCAPE_SEQUENCES, function() {
@@ -229,7 +231,7 @@ WEBHACK.create_screen = function (container_selector) {
   var writeCharacter = function(character) {
 
     if (handleEscape(character)) return;
-    if (LOG_RENDERING) $.log("rendered character: ", character);
+    if (log_rendering) $.log("rendered character: ", character);
 
     putCharacter(character, cursor.row, cursor.col);
 
@@ -241,7 +243,7 @@ WEBHACK.create_screen = function (container_selector) {
   };
 
   var print = function(string) {
-    if (LOG_UPDATES) $.log(string);
+    if (log_updates) $.log(string);
     $.each($.makeArray(string.split('')), function(i, c) {
       writeCharacter(c);
     });
@@ -271,6 +273,8 @@ WEBHACK.create_screen = function (container_selector) {
   self.print = print;
   self.addClass = addClass;
   self.removeClass = removeClass;
+  self.log_rendering = function(x){log_rendering = x};
+  self.log_updates = function(x){log_updates = x};
 
   return self;
 };

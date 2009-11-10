@@ -22,4 +22,12 @@ jQuery(document).ready(function($) {
   }
 
 
+
+  $.log = function() {
+    if (typeof console !== "undefined")
+    {
+      console.log.apply(this, arguments);
+    }
+  };
+  
 });

@@ -1,8 +1,10 @@
-WEBHACK.create_listener = function (uri){
+WEBHACK.create_listener = function (uri, options){
+
+  options = options || {};
 
   var $ = jQuery;
 
-  var LOG_CODES = false;
+  var log_codes = options.log_codes;
 
   var ready_to_send = true;
   var move_buffer = "";
@@ -11,10 +13,10 @@ WEBHACK.create_listener = function (uri){
 
   var convertKeypressToCharacter = function(event){
     var code = event.which;
-    if (LOG_CODES) $.log("code=" + code);
-    if (LOG_CODES) $.log("shift=" + event.shiftKey);
-    if (LOG_CODES) $.log("control=" + event.ctrlKey);
-    if (LOG_CODES) $.log("meta=" + event.metaKey);
+    if (log_codes) $.log("code=" + code);
+    if (log_codes) $.log("shift=" + event.shiftKey);
+    if (log_codes) $.log("control=" + event.ctrlKey);
+    if (log_codes) $.log("meta=" + event.metaKey);
 
     if (event.metaKey && !event.ctrlKey) return "";
 
@@ -106,6 +108,7 @@ WEBHACK.create_listener = function (uri){
   self.move = move;
   self.start = start;
   self.stop = stop;
+  self.log_codes = function(x){log_codes = x}
 
   return self;
 };
