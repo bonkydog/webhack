@@ -1,5 +1,7 @@
 class Game
 
+  cattr_accessor :nethack_path
+
   include Multiplex
 
 
@@ -70,7 +72,7 @@ class Game
 
     make_fifos
 
-    game = %[/opt/local/bin/nethack -u "#{@user.login}"]
+    game = %[#{Game.nethack_path} -u "#{@user.login}"]
     adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
     process = "#{adapter} '#{game}' #{downward_fifo_name} #{upward_fifo_name}"
     command = "nohup #{process} > /dev/null &"
@@ -93,6 +95,7 @@ class Game
     incoming_buffer
   end
 
+  #SPIKE experimental
   def look
     incoming_buffer = ""
     File.open(downward_fifo_name, File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do

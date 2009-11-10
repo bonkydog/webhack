@@ -13,6 +13,13 @@ describe DungeonsController do
     before do
       @user = Factory(:user)
       @game = Game.new(@user)
+      login_as @user
+    end
+
+    describe "#show" do
+      it "should have tests" do
+        pending
+      end
     end
 
     describe "#update" do
@@ -30,7 +37,7 @@ describe DungeonsController do
 
       it "should update the page via RJS" do
         response.should be_success
-        response.should render_template(:update)
+        response.should render_template("dungeons/show.js.haml")
       end
 
     end

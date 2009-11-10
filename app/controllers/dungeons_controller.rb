@@ -1,6 +1,7 @@
 class DungeonsController < ApplicationController
   before_filter :require_user
 
+  # SPIKE experimental
   def show
     @game = Game.new(current_user)
     @game.run
