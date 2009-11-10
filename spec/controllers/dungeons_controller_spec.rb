@@ -13,20 +13,19 @@ describe DungeonsController do
     before do
       @user = Factory(:user)
       @game = Game.new(@user)
+    end
+
+    describe "#update" do
 
       before do
         stub.proxy(Game).new do
           stub(@game).move(anything) {"OK, you're east."}
         end
-
-      end
-
-      describe "#update" do
         xhr :put, :update, :move => "go east"
       end
 
       it "should relay the move to the game" do
-        @found_game.should have_received.move("go east")
+        @game.should have_received.move("go east")
       end
 
       it "should update the page via RJS" do
@@ -37,5 +36,4 @@ describe DungeonsController do
     end
 
   end
-
 end
