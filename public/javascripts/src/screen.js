@@ -211,7 +211,7 @@ WEBHACK.create_screen = function (container_selector, options) {
     }
 
     if (escaping) {
-      if (log_rendering) $.log("escaped character: ", character);
+      if (log_rendering) $.log("escaped character: '", character + "' (" + character.charCodeAt(0) + ")");
       swallow_character = true;
       escapeBuffer += character;
       $.each(ESCAPE_SEQUENCES, function() {
@@ -234,7 +234,7 @@ WEBHACK.create_screen = function (container_selector, options) {
   var writeCharacter = function(character) {
 
     if (handleEscape(character)) return;
-    if (log_rendering) $.log("rendered character: ", character);
+    if (log_rendering) $.log("rendered character: '", character + "' (" + character.charCodeAt(0) + ")");
 
     putCharacter(character, cursor.row, cursor.col);
 
