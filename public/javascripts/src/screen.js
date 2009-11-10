@@ -190,8 +190,11 @@ WEBHACK.create_screen = function (container_selector, options) {
       sgr_mode = 0
     }],
 
-    // Line Feed / Carriage Return
+    // Line Feed
     [/^(\u000A)/, lineFeed],
+
+    // Carriage Return
+    [/^(\u000D)/, function(){cursor.col = 1}],
 
     // Unimplemented sequence: log and ignore.
     [/^(\u001B\[\??\d*;?\d*[a-zA-Z@`])/, function(x) {
@@ -202,7 +205,7 @@ WEBHACK.create_screen = function (container_selector, options) {
   var handleEscape = function(character) {
     var swallow_character = false;
 
-    if (character === "\u001B" || character === "\u0008" || character === "\u000A") {
+    if (character === "\u001B" || character === "\u0008" || character === "\u000A"  || character === "\u000D") {
       escapeBuffer = "";
       escaping = true;
     }

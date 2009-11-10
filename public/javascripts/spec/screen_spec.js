@@ -210,21 +210,32 @@ describe('screen', function () {
 
 
   describe("newline handling", function () {
-    it("should move the cursor to the beginning of the next line", function() {
-      screen.setCursor(2,3);
-      screen.print("\u000A");
-      expect(screen.getCursor()).toEqual({row: 3, col: 1});
+    describe("line feed", function () {
+      it("should move the cursor to the beginning of the next line", function() {
+        screen.setCursor(2, 3);
+        screen.print("\u000A");
+        expect(screen.getCursor()).toEqual({row: 3, col: 1});
+      });
+
+      it("should scroll the lines up if on the last line", function() {
+        screen.putCharacter("!", 1, 1);
+        screen.putCharacter("?", 2, 1);
+        screen.setCursor(25, 3);
+        screen.print("\u000A");
+        expect(screen.getCursor()).toEqual({row: 25, col: 1});
+        expect(screen.getCharacter(1, 1)).toEqual("?");
+        expect(screen.getCharacter(2, 1)).toEqual("");
+      });
     });
 
-    it("should scroll the lines up if on the last line", function() {
-      screen.putCharacter("!", 1, 1);
-      screen.putCharacter("?", 2, 1);
-      screen.setCursor(25,3);
-      screen.print("\u000A");
-      expect(screen.getCursor()).toEqual({row: 25, col: 1});
-      expect(screen.getCharacter(1, 1)).toEqual("?");
-      expect(screen.getCharacter(2, 1)).toEqual("");
+    describe("carriage return", function () {
+      it("should move the cursor to the beginning of the line", function() {
+        screen.setCursor(1,10);
+        screen.print("\u000D");
+        expect(screen.getCursor()).toEqual({row:1, col:1});
+      });
     });
+
   });
 
   describe("ANSI escape codes handling", function () {
