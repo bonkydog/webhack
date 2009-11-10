@@ -8,6 +8,7 @@ WEBHACK.create_listener = function (uri, authenticity_token, options){
 
   var ready_to_send = true;
   var move_buffer = "";
+  var polls = 5;
 
   // private ####################################
 
@@ -60,7 +61,8 @@ WEBHACK.create_listener = function (uri, authenticity_token, options){
     return character;
   };
 
-  var callback = function(){
+  var callback = function(x){
+    if (! /""/.test(x)) $().stopTime("poll");
     ready_to_send = true;
     move("");
   };
@@ -95,6 +97,12 @@ WEBHACK.create_listener = function (uri, authenticity_token, options){
 
   var start = function(){
     $().bind("keypress", handleEvent);
+    $().everyTime(2000, "poll", function(){
+        console.log("polling!");
+        $.post(uri, { _method : 'GET'}, function(x){
+          if (! /""/.test(x)) $().stopTime("poll");
+        }, 'script');
+    });
   };
 
   var stop = function(){
