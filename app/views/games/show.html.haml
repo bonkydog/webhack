@@ -5,7 +5,6 @@
 
       WEBHACK.listener = WEBHACK.create_listener("#{game_dungeon_url}");
       WEBHACK.listener.start();
-      WEBHACK.listener.move("\u0012"); // control-R.  asks nethack to redraw the screen.
 
     });
   = hidden_field_tag :authenticity_token, form_authenticity_token
