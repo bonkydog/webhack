@@ -1,7 +1,5 @@
 class Game
 
-  cattr_accessor :nethack_path
-
   include Multiplex
 
 
@@ -72,7 +70,7 @@ class Game
 
     make_fifos
 
-    game = %[#{Game.nethack_path} -u "#{@user.login}"]
+    game = %[#{::WEBHACK_CONFIG.nethack_path} -u "#{@user.login}"]
     adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
     process = "#{adapter} '#{game}' #{downward_fifo_name} #{upward_fifo_name}"
     command = "nohup #{process} > /dev/null &"

@@ -27,4 +27,5 @@ config.action_view.cache_template_loading            = true
 # Enable threaded mode
 # config.threadsafe!
 
-Game.nethack_path = "/usr/games/nethack" 
+::WEBHACK_CONFIG.nethack_path = "/usr/games/nethack"
+::WEBHACK_CONFIG.linefeed_handling = "linux"

@@ -1,15 +1,11 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 describe GamesController do
 
-
   describe "routes" do
-
     it "should route to restful show" do
       should route(:get, "/game").to(:controller => :games, :action => :show)
     end
-
   end
-
 
   describe "authentication" do
     before do
@@ -33,9 +29,15 @@ describe GamesController do
     end
 
     describe "#show" do
-      it "should fetch and assign the game for display" do
+      before do
         get :show
+      end
+
+      it "should succeed" do
         response.should be_success
+      end
+
+      it "should fetch and assign the game for display" do
         assigns(:game).should == @game
       end
     end

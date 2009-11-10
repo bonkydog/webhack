@@ -13,7 +13,8 @@ WEBHACK.create_screen = function (container_selector, options) {
 
   var log_updates = options.log_updates;
   var log_rendering =  options.log_rendering;
-
+  var linefeed_handling = options.linefeed_handling;
+  
   var cursor = {row: 1, col: 1};
   var container = $(container_selector).slice(0, 1);
   var table;
@@ -114,9 +115,14 @@ WEBHACK.create_screen = function (container_selector, options) {
   };
 
   var lineFeed = function() {
-    cursor.col = 1;
-    cursor.row++;
-    wrapOrScrollIfNecessary();
+    if (linefeed_handling === "osx") {
+      cursor.col = 1;
+      cursor.row++;
+      wrapOrScrollIfNecessary();
+    } else {
+      cursor.col = 1
+    }
+
   };
 
   jQuery.fn.erase = function() {
@@ -278,6 +284,7 @@ WEBHACK.create_screen = function (container_selector, options) {
   self.removeClass = removeClass;
   self.log_rendering = function(x){log_rendering = x};
   self.log_updates = function(x){log_updates = x};
+  self.linefeed_handling = function(x){linefeed_handling = x};
 
   return self;
 };

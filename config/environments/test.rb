@@ -27,4 +27,5 @@ config.action_mailer.delivery_method = :test
 # like if you have constraints or database-specific column types
 # config.active_record.schema_format = :sql
 
-Game.nethack_path = "/opt/local/bin/nethack" 
+::WEBHACK_CONFIG.nethack_path = "/opt/local/bin/nethack"
+::WEBHACK_CONFIG.linefeed_handling = "osx"
