@@ -97,7 +97,7 @@ WEBHACK.create_listener = function (uri, authenticity_token, options){
 
   var start = function(){
     $().bind("keypress", handleEvent);
-    move("\u0012"); // control-R.  asks nethack to redraw the screen.
+//    move("\u0012"); // control-R.  asks nethack to redraw the screen.
     $().everyTime(2000, "poll", function(){
         console.log("polling!");
         $.post(uri, { _method : 'GET'}, function(x){
