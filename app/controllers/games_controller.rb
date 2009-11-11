@@ -3,7 +3,7 @@ class GamesController < ApplicationController
 
   def show
     @game = Game.new(current_user)
-    @game.run
+    redirect_to new_user_session_url unless @game.running?
   end
   
 end

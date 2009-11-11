@@ -4,29 +4,36 @@ class DungeonsController < ApplicationController
   # SPIKE experimental
   def show
     @game = Game.new(current_user)
-    @game.run
+    if @game.running?
 
-    @output = @game.look
+      @output = @game.look
 
-    respond_to do |format|
-      format.js {}
+      respond_to do |format|
+        format.js {}
+      end
+
+    else
+      render :text => "location = '/';"
     end
-
   end
 
 
   def update
     @game = Game.new(current_user)
-    @game.run
 
-    move = params[:move]
+    if @game.running?
 
-    @output = @game.move(move)
+      move = params[:move]
 
-    respond_to do |format|
-      format.js {render :action => :show}
+      @output = @game.move(move)
+
+      respond_to do |format|
+        format.js {render :action => :show}
+      end
+
+    else
+      render :text => "location = '/';"
     end
-
   end
 
 end

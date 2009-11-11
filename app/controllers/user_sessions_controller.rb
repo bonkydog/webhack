@@ -8,6 +8,8 @@ class UserSessionsController < ApplicationController
   def create
     @user_session = UserSession.new(params[:user_session])
     if @user_session.save
+      Game.new(@user_session.user).start
+
       redirect_to game_url
     else
       render :action => :new

@@ -18,12 +18,50 @@ class Game
     `#{command}`
   end
 
-  def self.fork_and_exec(command)
-    pid = fork do
+
+#  Good chapter on daemons:
+#
+#  Advanced Programming in the UNIX¨ Environment: Second Edition
+#  By: W. Richard Stevens; Stephen A. Rago
+#  Publisher: Addison-Wesley Professional
+#  Pub. Date: June 17, 2005
+#  Print ISBN-10: 0-201-43307-9
+#  Print ISBN-13: 978-0-201-43307-4
+
+  def self.daemonize(command)
+    fork do
+      #reset umask so our current umask won't interfere with the daemon's business.
+      File.umask 0000
+
+      # become an orphan (without our sacrificial parent triggering on exit hooks)
+      exit! if fork
+
+      # start our own process group, free from controlling terminal
+      Process.setsid
+      
+      # go to root to prevent holding current directory in existence
+      Dir.chdir "/"
+
+      # close all inherited file handles.
+      hard_file_limit = Process.getrlimit(Process::RLIMIT_NOFILE)[1]
+      hard_file_limit = [1024, Process::RLIM_INFINITY].min
+      (0...hard_file_limit).each do |f|
+        begin
+          File.for_fd(f).close
+        rescue Errno::EBADF
+          #ignore
+        end
+      end
+      
+      # reopen standard file handles pointed at nothingness.
+      STDIN.reopen "/dev/null"
+      STDOUT.reopen "/dev/null"
+      STDERR.reopen "/dev/null"
+      
+      #become the requested command
       exec(command)
+      
     end
-    Process.detach(pid)
-    pid
   end
 
   #####################################################################
@@ -65,19 +103,25 @@ class Game
     found[1].to_i
   end
 
-  def run
-    return pid if  pid
+  def running?
+    ! pid.nil?
+  end
 
-    make_fifos
+  def start
+    unless running?  
 
-    game = %[#{::WEBHACK_CONFIG.nethack_path} -u "#{@user.login}"]
-    adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
-    process = "#{adapter} '#{game}' #{downward_fifo_name} #{upward_fifo_name}"
-    command = "nohup #{process} > /dev/null &"
-    puts command
+      make_fifos
 
-    Game.fork_and_exec command
-    sleep 1
+      game = %[#{::WEBHACK_CONFIG.nethack_path} -u "#{@user.login}"]
+      adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
+      process = "#{adapter} '#{game}' #{downward_fifo_name} #{upward_fifo_name}"
+      command = "nohup #{process} > /dev/null &"
+      puts command
+
+      Game.daemonize command
+      sleep 1
+
+   end
   end
 
   # SPIKE
