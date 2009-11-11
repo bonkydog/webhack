@@ -30,4 +30,14 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def in_game
+    @game = Game.new(current_user)
+    if @game.running?
+      return true
+    else
+      render :js => "location = '/';"
+      return false
+    end
+  end
+
 end
