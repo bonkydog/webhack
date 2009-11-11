@@ -27,6 +27,7 @@ describe DungeonsController do
       before do
         stub.proxy(Game).new do
           stub(@game).move(anything) {"OK, you're east."}
+          stub(@game).running? {true}
         end
         xhr :put, :update, :move => "go east"
       end

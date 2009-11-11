@@ -25,6 +25,7 @@ describe GamesController do
       login_as @user
       stub.proxy(Game).new do |game|
         @game = game
+        stub(@game).running? {true}
       end
     end
 

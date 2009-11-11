@@ -19,14 +19,18 @@ class Game
   end
 
 
-#  Good chapter on daemons:
-#
-#  Advanced Programming in the UNIX¨ Environment: Second Edition
-#  By: W. Richard Stevens; Stephen A. Rago
-#  Publisher: Addison-Wesley Professional
-#  Pub. Date: June 17, 2005
-#  Print ISBN-10: 0-201-43307-9
-#  Print ISBN-13: 978-0-201-43307-4
+  ####################################################################
+  # daemon
+  #
+  #
+  #  Good chapter on daemons:
+  #
+  #  Advanced Programming in the UNIX¨ Environment: Second Edition
+  #  By: W. Richard Stevens; Stephen A. Rago
+  #  Publisher: Addison-Wesley Professional
+  #  Pub. Date: June 17, 2005
+  #  Print ISBN-10: 0-201-43307-9
+  #  Print ISBN-13: 978-0-201-43307-4
 
   def self.daemonize(command)
     fork do
@@ -124,7 +128,6 @@ class Game
    end
   end
 
-  # SPIKE
   def move (input)
     incoming_buffer = ""
     outgoing_buffer = input.bytes.to_a
@@ -137,7 +140,6 @@ class Game
     incoming_buffer
   end
 
-  #SPIKE experimental
   def look
     incoming_buffer = ""
     File.open(downward_fifo_name, File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do
@@ -150,7 +152,7 @@ class Game
 
   private
 
-  # SPIKE
+
   def write(down, outgoing_buffer)
     outgoing_buffer.each do |c|
       while !IO.select(nil, [down], nil, 0.1)
@@ -162,7 +164,7 @@ class Game
     logger.info e.inspect
   end
 
-  # SPIKE
+
   def read(incoming_buffer, up)
     while IO.select([up], nil, nil, 0.1)
       incoming_buffer += up.sysread(max_buffer_size)

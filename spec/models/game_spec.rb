@@ -80,23 +80,23 @@ describe Game do
 
   end
 
-  describe "run" do
-    context "when the game is running" do
+  describe "start" do
+    context "when the game already is running" do
       before do
         simulate_game_running
       end
 
       it "should not start a new game process" do
-        dont_allow(Game).fork_and_exec
-        @game.run
+        dont_allow(Game).daemonize
+        @game.start
       end
     end
 
     context "when the game not running" do
       before do
         simulate_game_not_running
-        stub(Game).fork_and_exec(anything) {13013}
-        @game.run
+        stub(Game).daemonize(anything)
+        @game.start
       end
 
       it "should make the fifos" do
@@ -106,40 +106,19 @@ describe Game do
 
 
       it "should start a new game process" do
-        Game.should have_received.fork_and_exec(%r[pty_fifo_adapter])
+        Game.should have_received.daemonize(%r[pty_fifo_adapter])
       end
       
     end
   end
 
-
-  describe "move_and_look" do
-    it "should be tested" do
-      pending
-    end
-  end
-
-  describe "read" do
-    it "should be tested" do
-      pending
-    end
-
-  end
-
-  describe "write" do
-    it "should be tested" do
-      pending
-    end
-  end
-
-
-  ######################################
+ ######################################
 
 
   def fake_output(game_process_line)
     fake_output = <<-OUT
 PID COMMAND
-1 /sbin/launchd
+  1 /sbin/launchd
  10 /usr/libexec/kextd
  11 /usr/sbin/notifyd
  12 /usr/sbin/syslogd
