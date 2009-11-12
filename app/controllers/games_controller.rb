@@ -3,7 +3,9 @@ class GamesController < ApplicationController
 
   def show
     @game = Game.new(current_user)
+    @reload = ! flash[:new_game]
     redirect_to new_user_session_url unless @game.running?
   end
   
 end
+

@@ -4,11 +4,13 @@ describe("listener", function () {
 
   var listener;
   var event;
+  var uri = "http://webhack.example.com:3000/games/1/dungeon";
+  var authenticity_token = "a worthless piece of red glass";
   beforeEach(function() {
 
     jasmine.Clock.useMock();
 
-    listener = WEBHACK.create_listener("http://webhack.example.com:3000/games/1/dungeon");
+    listener = WEBHACK.create_listener(uri, authenticity_token);
 
     event = function(which, shiftKey, ctrlKey, metaKey) {
       which = $.isString(which) ? which.charCodeAt() : which;
@@ -21,7 +23,6 @@ describe("listener", function () {
     };
 
   });
-
 
 
   describe("convertKeypressToCharacter", function () {
@@ -83,7 +84,6 @@ describe("listener", function () {
 
     });
 
-    
 
     it("should understand the control-letter keys", function() {
       expect(listener.convertKeypressToCharacter(event("A", false, true))).toEqual("\u0001");
@@ -126,7 +126,7 @@ describe("listener", function () {
 
     it("should PUT a string to the uri", function() {
       expect(args[0]).toEqual("http://webhack.example.com:3000/games/1/dungeon");
-      expect(args[1]).toEqual({"_method": "PUT", "move": "hjkl"});
+      expect(args[1]).toEqual({ _method : 'PUT', move : 'hjkl', authenticity_token : authenticity_token });
       expect($.isFunction(args[2])).toBeTruthy();
       expect(args[3]).toEqual("script");
     });
@@ -146,7 +146,7 @@ describe("listener", function () {
       var second_args = $.post.argsForCall[1];
 
       expect(second_args[0]).toEqual("http://webhack.example.com:3000/games/1/dungeon");
-      expect(second_args[1]).toEqual({"_method": "PUT", "move": "quack"});
+      expect(second_args[1]).toEqual({"_method": "PUT", "move": "quack", authenticity_token : authenticity_token});
       expect(second_args[2]).toBe(callback);
       expect(second_args[3]).toEqual("script");
     });
@@ -179,9 +179,73 @@ describe("listener", function () {
       listener.move("");
       expect($.post.callCount).toEqual(1);
     });
-
-
   });
 
+  describe("start", function () {
+
+    afterEach(function() {
+      listener.stop();
+    });
+
+    it("should bind keypress", function() {
+      spyOn($.fn, "bind");
+      listener.start(true);
+      expect($.fn.bind).wasCalled();
+      expect($.fn.bind.mostRecentCall.args[0]).toEqual("keypress");
+      expect($.isFunction($.fn.bind.mostRecentCall.args[1])).toBeTruthy();
+    });
+
+
+    describe("for a new game", function () {
+      it("should poll until it gets a page update", function() {
+        spyOn($, 'get');
+        expect($.get.callCount).toEqual(0);
+
+
+        listener.start(false);
+
+        expect($.get.callCount).toEqual(0);
+
+
+        jasmine.Clock.tick(2000);
+
+        expect($.get.callCount).toEqual(1);
+        expect($.get.mostRecentCall.args[0]).toEqual(uri);
+        expect($.isFunction($.get.mostRecentCall.args[1])).toBeTruthy();
+        expect($.get.mostRecentCall.args[2]).toEqual("script");
+
+        jasmine.Clock.tick(2000);
+        expect($.get.callCount).toEqual(2);
+
+        listener.stopPollingIfUpdated('screen.print("");')
+
+        jasmine.Clock.tick(2000);
+        expect($.get.callCount).toEqual(3);
+
+        listener.stopPollingIfUpdated('screen.print("frobozz");')
+
+        jasmine.Clock.tick(2000);
+        expect($.get.callCount).toEqual(3);
+        
+        jasmine.Clock.tick(2000);
+        expect($.get.callCount).toEqual(3);
+
+      });
+    });
+
+    describe("for an in-progress game", function () {
+      it("should send a reload request", function() {
+        spyOn($, 'post');
+        listener.start(true);
+        expect($.post).wasCalled();
+        expect($.post.mostRecentCall.args[0]).toEqual(uri);
+        expect($.post.mostRecentCall.args[1]).toEqual({ _method : 'PUT', move : "\u0012", authenticity_token : 'a worthless piece of red glass' } );
+        expect($.isFunction($.post.mostRecentCall.args[2])).toBeTruthy();
+        expect($.post.mostRecentCall.args[3]).toEqual("script");
+
+      });
+    });
+
+  });
 
 });

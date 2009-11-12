@@ -120,10 +120,10 @@ class Game
       adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
       process = "#{adapter} '#{game}' #{downward_fifo_name} #{upward_fifo_name}"
       command = "nohup #{process} > /dev/null &"
-      puts command
 
       Game.daemonize command
-      sleep 1
+
+      sleep 0.1 until running?
 
    end
   end
@@ -142,8 +142,8 @@ class Game
 
   def look
     incoming_buffer = ""
-    File.open(downward_fifo_name, File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do
-      File.open(upward_fifo_name, File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
+    File.open(downward_fifo_name, File::WRONLY | File::EXCL | File::SYNC ) do
+      File.open(upward_fifo_name, File::RDONLY | File::EXCL | File::SYNC ) do |up|
         incoming_buffer = read(incoming_buffer, up)
       end
     end
@@ -151,7 +151,6 @@ class Game
   end
 
   private
-
 
   def write(down, outgoing_buffer)
     outgoing_buffer.each do |c|

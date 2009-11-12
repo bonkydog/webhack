@@ -1,4 +1,4 @@
-WEBHACK.create_listener = function (uri, authenticity_token, options){
+WEBHACK.create_listener = function (uri, authenticity_token, options) {
 
   options = options || {};
 
@@ -12,7 +12,7 @@ WEBHACK.create_listener = function (uri, authenticity_token, options){
 
   // private ####################################
 
-  var convertKeypressToCharacter = function(event){
+  var convertKeypressToCharacter = function(event) {
     var code = event.which;
     if (log_codes) $.log("code=" + code);
     if (log_codes) $.log("shift=" + event.shiftKey);
@@ -61,32 +61,32 @@ WEBHACK.create_listener = function (uri, authenticity_token, options){
     return character;
   };
 
-  var callback = function(x){
+  var becomeReadyToSend = function(x) {
     if (! /""/.test(x)) $().stopTime("poll");
     ready_to_send = true;
     move("");
   };
 
 
-  var timeout = function(){
+  var timeout = function() {
     $.log("timed out waiting for response");
-    callback();
+    becomeReadyToSend();
   };
 
 
-  var move = function(move){
+  var move = function(move) {
     move_buffer += move;
     if (move_buffer === "") return;
     if (ready_to_send) {
-      $().stopTime("webhack listener");
-      $.post(uri, { _method : 'PUT', move : move_buffer, authenticity_token: authenticity_token }, callback, 'script');
+      $().stopTime("move");
+      $.post(uri, { _method : 'PUT', move : move_buffer, authenticity_token: authenticity_token }, becomeReadyToSend, 'script');
       ready_to_send = false;
       move_buffer = "";
-      $().oneTime(10000, "webhack listener", timeout);
+      $().oneTime(10000, "move", timeout);
     }
   };
 
-  var handleEvent = function(event){
+  var handleEvent = function(event) {
     var character = convertKeypressToCharacter(event);
     if (character === "") return true;
     move(character);
@@ -94,30 +94,43 @@ WEBHACK.create_listener = function (uri, authenticity_token, options){
   };
 
 
+  var stopPollingIfUpdated = function(x){
+    if (! /""/.test(x)) $().stopTime("poll");
+  };
+
+  var poll = function(){
+    $.log("polling!");
+    $.get(uri, stopPollingIfUpdated, 'script');
+  };
 
   var start = function(){
     $().bind("keypress", handleEvent);
+    $.log("reloading!")
     move("\u0012"); // control-R.  asks nethack to redraw the screen.
-    $().everyTime(2000, "poll", function(){
-        $.log("polling!");
-        $.post(uri, { _method : 'GET'}, function(x){
-          if (! /""/.test(x)) $().stopTime("poll");
-        }, 'script');
-    });
+    $().everyTime(2000, "poll", poll);
   };
 
-  var stop = function(){
+  var stop = function() {
     $().unbind("keypress", handleEvent);
+    $().stopTime("poll");
+    $().stopTime("move")
   };
 
   // interface ##################################
   var self = {};
 
+  // only exposed for testing:
+  self.stopPollingIfUpdated = stopPollingIfUpdated;
+
+  // real interface:
+  
   self.convertKeypressToCharacter = convertKeypressToCharacter;
   self.move = move;
   self.start = start;
   self.stop = stop;
-  self.log_codes = function(x){log_codes = x}
+  self.log_codes = function(x) {
+    log_codes = x
+  }
 
   return self;
 };

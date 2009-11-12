@@ -5,12 +5,41 @@ require "uuid"
 describe Game do
 
 
+  def fake_output(game_process_line)
+    fake_output = <<-OUT
+PID COMMAND
+  1 /sbin/launchd
+ 10 /usr/libexec/kextd
+ 11 /usr/sbin/notifyd
+ 12 /usr/sbin/syslogd
+#{game_process_line}55555 destroy_everything.rb'
+    OUT
+  end
+
+  def game_process_line
+     %[13013 pty_fifo_adapter.rb 'nethack -u "#{@user.login}"'\n]
+  end
+
+
+
 
   before do
     @test_temp_dir = FileUtils.mkdir_p(File.join(Dir.tmpdir, "webhack_test_dir_#{UUID.generate}"))
     stub(Game).game_fifo_dir { @test_temp_dir }
     @user = Factory(:user)
     @game = Game.new(@user)
+    @pretend_game_has_been_started = false;
+
+    stub(Game).backtick("ps -eo pid,command") {
+      if @pretend_game_has_been_started
+        fake_output(game_process_line)
+      else
+        fake_output("")
+      end
+    }
+
+    stub(Game).daemonize(anything) {@pretend_game_has_been_started = true}
+
   end
 
   after do
@@ -59,7 +88,7 @@ describe Game do
 
     context "when the game is running" do
       before do
-        simulate_game_running
+        @pretend_game_has_been_started = true
       end
 
       it "should eturn the pid of the game process" do
@@ -69,7 +98,7 @@ describe Game do
 
     context "when the game not running" do
       before do
-        simulate_game_not_running
+        @pretend_game_has_been_started = false
       end
 
       it "should return the pid of the game process" do
@@ -77,13 +106,12 @@ describe Game do
       end
     end
 
-
   end
 
   describe "start" do
     context "when the game already is running" do
       before do
-        simulate_game_running
+        @pretend_game_has_been_started = true
       end
 
       it "should not start a new game process" do
@@ -94,8 +122,7 @@ describe Game do
 
     context "when the game not running" do
       before do
-        simulate_game_not_running
-        stub(Game).daemonize(anything)
+        @pretend_game_has_been_started = false
         @game.start
       end
 
@@ -108,32 +135,10 @@ describe Game do
       it "should start a new game process" do
         Game.should have_received.daemonize(%r[pty_fifo_adapter])
       end
-      
+
     end
   end
 
- ######################################
-
-
-  def fake_output(game_process_line)
-    fake_output = <<-OUT
-PID COMMAND
-  1 /sbin/launchd
- 10 /usr/libexec/kextd
- 11 /usr/sbin/notifyd
- 12 /usr/sbin/syslogd
-#{game_process_line}55555 destroy_everything.rb'
-    OUT
-  end
-
-  def simulate_game_running
-    game_process_line = %[13013 pty_fifo_adapter.rb 'nethack -u "#{@user.login}"'\n]
-    stub(Game).backtick("ps -eo pid,command") {fake_output(game_process_line)}
-  end
-
-  def simulate_game_not_running
-    stub(Game).backtick("ps -eo pid,command") {fake_output("")}
-  end
 
 
 end

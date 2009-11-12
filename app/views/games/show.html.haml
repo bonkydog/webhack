@@ -4,7 +4,7 @@
       WEBHACK.screen = WEBHACK.create_screen("div.screen-container", {linefeed_handling : "#{::WEBHACK_CONFIG.linefeed_handling}"});
 
       WEBHACK.listener = WEBHACK.create_listener("#{game_dungeon_url}");
-      WEBHACK.listener.start();
+      WEBHACK.listener.start(#{!!@reload});
 
     });
   = hidden_field_tag :authenticity_token, form_authenticity_token

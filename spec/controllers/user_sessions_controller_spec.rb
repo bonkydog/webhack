@@ -65,6 +65,10 @@ describe UserSessionsController do
           response.should redirect_to(game_url)
         end
 
+        it "should tell the games controller that this is a new game" do
+          flash[:new_game].should be_true
+        end
+
       end
 
       context "failed login" do

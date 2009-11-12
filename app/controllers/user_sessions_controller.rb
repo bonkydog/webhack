@@ -10,6 +10,7 @@ class UserSessionsController < ApplicationController
     if @user_session.save
       Game.new(@user_session.user).start
 
+      flash[:new_game] = true
       redirect_to game_url
     else
       render :action => :new
