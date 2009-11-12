@@ -100,7 +100,7 @@ WEBHACK.create_listener = function (uri, authenticity_token, options) {
 
   var poll = function(){
     debug.log("polling!");
-    $.get(uri, stopPollingIfUpdated, 'script');
+    $.post(uri, { _method : 'GET' }, stopPollingIfUpdated, 'script');
   };
 
   var start = function(reload){
