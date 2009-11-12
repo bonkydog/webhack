@@ -11,6 +11,12 @@ It renders ANSI escape codes into an 25x80 html table, one character per cell!
 
 It probably only works with Firefox OSX keyboard events!
 
-It is completely useless and kind of insane!
+It is completely useless and kind of insane.
 
 Happy hacking!
+
+Copyright (c) 2009 Brian Jenkins
+Licensed under the MIT License
+http://creativecommons.org/licenses/MIT/
+
+Libraries are copyrighted and licensed as noted.
