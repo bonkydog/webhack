@@ -12,9 +12,9 @@ WEBHACK.create_screen = function (container_selector, options) {
   var MAX_COL = 80;
 
   var log_updates = options.log_updates;
-  var log_rendering =  options.log_rendering;
+  var log_rendering = options.log_rendering;
   var linefeed_handling = options.linefeed_handling;
-  
+
   var cursor = {row: 1, col: 1};
   var container = $(container_selector).slice(0, 1);
   var table;
@@ -45,7 +45,7 @@ WEBHACK.create_screen = function (container_selector, options) {
         var tr = $("<tr>");
         tbody.append(tr);
         buildRow(tr);
-      }
+    }
     }
 
   };
@@ -77,7 +77,7 @@ WEBHACK.create_screen = function (container_selector, options) {
   };
 
   var putCharacter = function(character, row, col) {
-    findCell(row, col).html(character);
+    findCell(row, col).text(character);
   };
 
   var getCharacter = function(row, col) {
@@ -200,24 +200,26 @@ WEBHACK.create_screen = function (container_selector, options) {
     [/^(\u000A)/, lineFeed],
 
     // Carriage Return
-    [/^(\u000D)/, function(){cursor.col = 1}],
+    [/^(\u000D)/, function() {
+      cursor.col = 1
+    }],
 
     // Unimplemented sequence: log and ignore.
     [/^(\u001B\[\??\d*;?\d*[a-zA-Z@`])/, function(x) {
-      $.log("Unimplemented ANSI escape sequence: " + x)
+      debug.log("Unimplemented ANSI escape sequence: " + x)
     }]
   ];
 
   var handleEscape = function(character) {
     var swallow_character = false;
 
-    if (character === "\u001B" || character === "\u0008" || character === "\u000A"  || character === "\u000D") {
+    if (character === "\u001B" || character === "\u0008" || character === "\u000A" || character === "\u000D") {
       escapeBuffer = "";
       escaping = true;
     }
 
     if (escaping) {
-      if (log_rendering) $.log("escaped character: '", character + "' (" + character.charCodeAt(0) + ")");
+      if (log_rendering) debug.log("escaped character: '", character + "' (" + character.charCodeAt(0) + ")");
       swallow_character = true;
       escapeBuffer += character;
       $.each(ESCAPE_SEQUENCES, function() {
@@ -240,7 +242,7 @@ WEBHACK.create_screen = function (container_selector, options) {
   var writeCharacter = function(character) {
 
     if (handleEscape(character)) return;
-    if (log_rendering) $.log("rendered character: '", character + "' (" + character.charCodeAt(0) + ")");
+    if (log_rendering) debug.log("rendered character: '", character + "' (" + character.charCodeAt(0) + ")");
 
     putCharacter(character, cursor.row, cursor.col);
 
@@ -252,7 +254,7 @@ WEBHACK.create_screen = function (container_selector, options) {
   };
 
   var print = function(string) {
-    if (log_updates) $.log(string);
+    if (log_updates) debug.log(string);
     $.each($.makeArray(string.split('')), function(i, c) {
       writeCharacter(c);
     });
@@ -282,9 +284,15 @@ WEBHACK.create_screen = function (container_selector, options) {
   self.print = print;
   self.addClass = addClass;
   self.removeClass = removeClass;
-  self.log_rendering = function(x){log_rendering = x};
-  self.log_updates = function(x){log_updates = x};
-  self.linefeed_handling = function(x){linefeed_handling = x};
+  self.log_rendering = function(x) {
+    log_rendering = x
+  };
+  self.log_updates = function(x) {
+    log_updates = x
+  };
+  self.linefeed_handling = function(x) {
+    linefeed_handling = x
+  };
 
   return self;
 };

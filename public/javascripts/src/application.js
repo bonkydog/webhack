@@ -16,13 +16,5 @@ jQuery(document).ready(function($) {
   if ($("div.screen-container").size() > 0) {
   }
 
-
-
-  $.log = function() {
-    if (typeof console !== "undefined")
-    {
-      console.log.apply(this, arguments);
-    }
-  };
   
 });

@@ -14,10 +14,10 @@ WEBHACK.create_listener = function (uri, authenticity_token, options) {
 
   var convertKeypressToCharacter = function(event) {
     var code = event.which;
-    if (log_codes) $.log("code=" + code);
-    if (log_codes) $.log("shift=" + event.shiftKey);
-    if (log_codes) $.log("control=" + event.ctrlKey);
-    if (log_codes) $.log("meta=" + event.metaKey);
+    if (log_codes) debug.log("code=" + code);
+    if (log_codes) debug.log("shift=" + event.shiftKey);
+    if (log_codes) debug.log("control=" + event.ctrlKey);
+    if (log_codes) debug.log("meta=" + event.metaKey);
 
     if (event.metaKey && !event.ctrlKey) return "";
 
@@ -69,7 +69,7 @@ WEBHACK.create_listener = function (uri, authenticity_token, options) {
 
 
   var timeout = function() {
-    $.log("timed out waiting for response");
+    debug.log("timed out waiting for response");
     becomeReadyToSend();
   };
 
@@ -99,13 +99,13 @@ WEBHACK.create_listener = function (uri, authenticity_token, options) {
   };
 
   var poll = function(){
-    $.log("polling!");
+    debug.log("polling!");
     $.get(uri, stopPollingIfUpdated, 'script');
   };
 
   var start = function(){
     $().bind("keypress", handleEvent);
-    $.log("reloading!")
+    debug.log("reloading!")
     move("\u0012"); // control-R.  asks nethack to redraw the screen.
     $().everyTime(2000, "poll", poll);
   };
