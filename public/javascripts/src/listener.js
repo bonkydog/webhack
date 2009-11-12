@@ -103,11 +103,14 @@ WEBHACK.create_listener = function (uri, authenticity_token, options) {
     $.get(uri, stopPollingIfUpdated, 'script');
   };
 
-  var start = function(){
+  var start = function(reload){
     $().bind("keypress", handleEvent);
-    debug.log("reloading!")
-    move("\u0012"); // control-R.  asks nethack to redraw the screen.
-    $().everyTime(2000, "poll", poll);
+    if (reload) {
+      debug.log("reloading!")
+      move("\u0012"); // control-R.  asks nethack to redraw the screen.
+    } else {
+      $().everyTime(2000, "poll", poll);
+    }
   };
 
   var stop = function() {

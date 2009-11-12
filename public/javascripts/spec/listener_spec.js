@@ -231,6 +231,13 @@ describe("listener", function () {
         expect($.get.callCount).toEqual(3);
 
       });
+
+      it("should not send a reload request", function() {
+        spyOn($, 'post');
+        listener.start(false);
+        expect($.post).wasNotCalled();
+      });
+
     });
 
     describe("for an in-progress game", function () {
@@ -242,7 +249,6 @@ describe("listener", function () {
         expect($.post.mostRecentCall.args[1]).toEqual({ _method : 'PUT', move : "\u0012", authenticity_token : 'a worthless piece of red glass' } );
         expect($.isFunction($.post.mostRecentCall.args[2])).toBeTruthy();
         expect($.post.mostRecentCall.args[3]).toEqual("script");
-
       });
     });
 
