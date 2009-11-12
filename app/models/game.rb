@@ -142,8 +142,8 @@ class Game
 
   def look
     incoming_buffer = ""
-    File.open(downward_fifo_name, File::WRONLY | File::EXCL | File::SYNC ) do
-      File.open(upward_fifo_name, File::RDONLY | File::EXCL | File::SYNC ) do |up|
+    File.open(downward_fifo_name, File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do
+      File.open(upward_fifo_name, File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
         incoming_buffer = read(incoming_buffer, up)
       end
     end
