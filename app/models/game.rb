@@ -123,7 +123,9 @@ class Game
 
       Game.daemonize command
 
-      sleep 0.1 until running?
+      # debugging startup.
+      # sleep 0.1 until running?
+      sleep 1
 
    end
   end

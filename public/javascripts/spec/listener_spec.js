@@ -198,37 +198,38 @@ describe("listener", function () {
 
     describe("for a new game", function () {
       it("should poll until it gets a page update", function() {
-        spyOn($, 'get');
-        expect($.get.callCount).toEqual(0);
+        spyOn($, 'post');
+        expect($.post.callCount).toEqual(0);
 
 
         listener.start(false);
 
-        expect($.get.callCount).toEqual(0);
+        expect($.post.callCount).toEqual(0);
 
 
         jasmine.Clock.tick(2000);
 
-        expect($.get.callCount).toEqual(1);
-        expect($.get.mostRecentCall.args[0]).toEqual(uri);
-        expect($.isFunction($.get.mostRecentCall.args[1])).toBeTruthy();
-        expect($.get.mostRecentCall.args[2]).toEqual("script");
+        expect($.post.callCount).toEqual(1);
+        expect($.post.mostRecentCall.args[0]).toEqual(uri);
+        expect($.post.mostRecentCall.args[1]).toEqual({ _method : 'GET'});
+        expect($.isFunction($.post.mostRecentCall.args[2])).toBeTruthy();
+        expect($.post.mostRecentCall.args[3]).toEqual("script");
 
         jasmine.Clock.tick(2000);
-        expect($.get.callCount).toEqual(2);
+        expect($.post.callCount).toEqual(2);
 
         listener.stopPollingIfUpdated('screen.print("");')
 
         jasmine.Clock.tick(2000);
-        expect($.get.callCount).toEqual(3);
+        expect($.post.callCount).toEqual(3);
 
         listener.stopPollingIfUpdated('screen.print("frobozz");')
 
         jasmine.Clock.tick(2000);
-        expect($.get.callCount).toEqual(3);
+        expect($.post.callCount).toEqual(3);
         
         jasmine.Clock.tick(2000);
-        expect($.get.callCount).toEqual(3);
+        expect($.post.callCount).toEqual(3);
 
       });
 
