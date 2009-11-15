@@ -103,7 +103,7 @@ class Game
   end
 
   def pid
-    regexp = /^\s*(\d+)\s+(?!.*pty).*nethack -u #{@user.login}\b/
+    regexp = /^\s*(\d+)\s+(?!.*pty).*nethack(-console)? -u #{@user.login}\b/
     process_list = Game.backtick("ps -eo pid,command")
 #    logger.info(process_list)
     found = regexp.match( process_list)
