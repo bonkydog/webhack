@@ -16,12 +16,10 @@ PID COMMAND
     OUT
   end
 
-  def game_process_line
-     %[13013 pty_fifo_adapter.rb 'nethack -u "#{@user.login}"'\n]
+  def game_process_lines
+     %[13012 pty_fifo_adapter.rb '/opt/local/bin/nethack -u "#{@user.login}"'\n]
+     %[13013 /opt/local/bin/nethack -u #{@user.login}\n]
   end
-
-
-
 
   before do
     @test_temp_dir = FileUtils.mkdir_p(File.join(Dir.tmpdir, "webhack_test_dir_#{UUID.generate}"))
@@ -32,13 +30,15 @@ PID COMMAND
 
     stub(Game).backtick("ps -eo pid,command") {
       if @pretend_game_has_been_started
-        fake_output(game_process_line)
+        fake_output(game_process_lines)
       else
         fake_output("")
       end
     }
 
-    stub(Game).daemonize(anything) {@pretend_game_has_been_started = true}
+    stub(Game).daemonize(anything) do
+      @pretend_game_has_been_started = true
+    end
 
   end
 
@@ -91,7 +91,7 @@ PID COMMAND
         @pretend_game_has_been_started = true
       end
 
-      it "should eturn the pid of the game process" do
+      it "should return the pid of the game process" do
         @game.pid.should == 13013
       end
     end
@@ -125,12 +125,6 @@ PID COMMAND
         @pretend_game_has_been_started = false
         @game.start
       end
-
-      it "should make the fifos" do
-        `ls -l #{@game.downward_fifo_name}`.should =~ /^p/
-        `ls -l #{@game.upward_fifo_name}`.should =~ /^p/
-      end
-
 
       it "should start a new game process" do
         Game.should have_received.daemonize(%r[pty_fifo_adapter])

@@ -4,7 +4,7 @@ describe PtyFifoAdapter do
 
 
   describe "#run" do
-    
+
   end
 
 

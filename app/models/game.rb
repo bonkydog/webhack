@@ -40,6 +40,8 @@ class Game
       # become an orphan (without our sacrificial parent triggering on exit hooks)
       exit! if fork
 
+      logger.info "Daemon spawned, pid #$$"
+
       # start our own process group, free from controlling terminal
       Process.setsid
       
@@ -73,7 +75,7 @@ class Game
 
 
   def self.make_fifo(fifo_path)
-    `mkfifo #{fifo_path}`
+    `mkfifo #{fifo_path}` unless File.exist?(fifo_path)
   end
 
   def fifo_name(direction)
@@ -96,36 +98,48 @@ class Game
 
   def unlink_fifos
     [downward_fifo_name, upward_fifo_name].each do |fifo_name|
-      FileUtils.rm(fifo_name)
+      FileUtils.rm_f(fifo_name)
     end
   end
 
   def pid
-    regexp = /\s*(\d+).*pty_fifo_adapter.*-u "#{@user.login}".*/
-    found = regexp.match(Game.backtick("ps -eo pid,command"))
-    return nil unless found
-    found[1].to_i
+    regexp = /^\s*(\d+)\s+(?!.*pty).*nethack -u #{@user.login}\b/
+    process_list = Game.backtick("ps -eo pid,command")
+#    logger.info(process_list)
+    found = regexp.match( process_list)
+    if found
+      pid = found[1].to_i
+      logger.info "found game for #{@user.login}, pid #{pid}"
+      return pid
+    else
+      logger.info "no game found for #{@user.login}"
+      return nil
+    end
   end
 
   def running?
     ! pid.nil?
   end
 
+  def game_command
+    %[#{::WEBHACK_CONFIG.nethack_path} -u "#{@user.login}"]
+  end
+
   def start
     unless running?  
 
-      make_fifos
+      unlink_fifos
 
-      game = %[#{::WEBHACK_CONFIG.nethack_path} -u "#{@user.login}"]
       adapter = File.join(Rails.root, "app/models/pty_fifo_adapter.rb")
-      process = "#{adapter} '#{game}' #{downward_fifo_name} #{upward_fifo_name}"
+      process = "#{adapter} '#{game_command}' #{downward_fifo_name} #{upward_fifo_name}"
       command = "nohup #{process} > /dev/null &"
 
       Game.daemonize command
 
-      # debugging startup.
-      # sleep 0.1 until running?
-      sleep 1
+      until running? && File.exist?(downward_fifo_name) && File.exist?(upward_fifo_name)
+        logger.info "waiting for game to start..."
+        sleep 1
+      end
 
    end
   end
@@ -157,12 +171,13 @@ class Game
   def write(down, outgoing_buffer)
     outgoing_buffer.each do |c|
       while !IO.select(nil, [down], nil, 0.1)
-        puts "whuuut?"
+        logger.error "File not ready on write."
       end
       down.syswrite(c.chr)
     end
   rescue Exception => e
-    logger.info e.inspect
+    logger.error "Exception on write: #{e.inspect}"
+    return ""
   end
 
 
@@ -172,8 +187,7 @@ class Game
     end
     return incoming_buffer
   rescue Exception => e
-    logger.info e.inspect
+    logger.error "Exception on read: #{e.inspect}"
   end
-
 
 end
