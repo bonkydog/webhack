@@ -138,25 +138,22 @@ class Game
   # game interaction
 
   def move (input)
-    incoming_buffer = ""
     outgoing_buffer = input.bytes.to_a
     File.open(downward_fifo_name, File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |down|
       File.open(upward_fifo_name, File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
         write(down, outgoing_buffer)
-        incoming_buffer = read(incoming_buffer, up)
+        return read(up)
       end
     end
     incoming_buffer
   end
 
   def look
-    incoming_buffer = ""
     File.open(downward_fifo_name, File::WRONLY | File::EXCL | File::SYNC | File::NONBLOCK) do
       File.open(upward_fifo_name, File::RDONLY | File::EXCL | File::SYNC | File::NONBLOCK) do |up|
-        incoming_buffer = read(incoming_buffer, up)
+        return read(up)
       end
     end
-    incoming_buffer
   end
 
   private
@@ -170,17 +167,18 @@ class Game
     end
   rescue Exception => e
     logger.error "Exception on write: #{e.inspect}"
-    return ""
   end
 
 
-  def read(incoming_buffer, up)
+  def read(up)
+    incoming_buffer = ""
     while IO.select([up], nil, nil, 0.1)
       incoming_buffer += up.sysread(max_buffer_size)
     end
     return incoming_buffer
   rescue Exception => e
     logger.error "Exception on read: #{e.inspect}"
+    return ""
   end
 
 end
