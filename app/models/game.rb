@@ -71,12 +71,8 @@ class Game
   end
 
   #####################################################################
-  # fifo management
+  # game management
 
-
-  def self.make_fifo(fifo_path)
-    `mkfifo #{fifo_path}` unless File.exist?(fifo_path)
-  end
 
   def fifo_name(direction)
     File.join(Game.game_fifo_dir, "#{direction}ward_fifo_#{@user.id}")
@@ -88,12 +84,6 @@ class Game
 
   def upward_fifo_name
     fifo_name("up")
-  end
-
-  def make_fifos
-    [downward_fifo_name, upward_fifo_name].each do |fifo_name|
-      Game.make_fifo(fifo_name)
-    end
   end
 
   def unlink_fifos
@@ -143,6 +133,9 @@ class Game
 
    end
   end
+
+  #############################################################
+  # game interaction
 
   def move (input)
     incoming_buffer = ""

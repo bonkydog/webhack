@@ -46,15 +46,18 @@ class PtyFifoAdapter
     PTY.spawn(@command) do |coming_up, going_down|
       `mkfifo #{@downward_fifo_path}`
       `mkfifo #{@upward_fifo_path}`
-      coming_down = File.open(@downward_fifo_path, File::RDONLY | File::EXCL | File::SYNC)
-      going_up = File.open(@upward_fifo_path, File::WRONLY | File::EXCL | File::SYNC)
-
-      DuplexStreamAdapter.new(coming_down, coming_up, going_down, going_up).adapt
+      File.open(@downward_fifo_path, File::RDONLY | File::EXCL | File::SYNC) do |coming_down|
+        File.open(@upward_fifo_path, File::WRONLY | File::EXCL | File::SYNC) do |going_up|
+          begin
+            DuplexStreamAdapter.new(coming_down, coming_up, going_down, going_up).adapt
+          ensure
+            sleep 10 # give the controller a moment to pick up the last of the output
+          end
+        end
+      end
     end
   rescue PTY::ChildExited
     logger.info("child exited.")
-  ensure
-    sleep 0.5 # give the controller a chance to pick up the last bit of output.
   end
 
 end

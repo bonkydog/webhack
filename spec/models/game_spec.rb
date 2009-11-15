@@ -36,6 +36,24 @@ PID COMMAND
       end
     }
 
+    stub(File).exist?(@game.upward_fifo_name) {
+      if @pretend_game_has_been_started
+        true
+      else
+        false
+      end
+    }
+
+    stub(File).exist?(@game.downward_fifo_name) {
+      if @pretend_game_has_been_started
+        true
+      else
+        false
+      end
+    }
+
+
+
     stub(Game).daemonize(anything) do
       @pretend_game_has_been_started = true
     end
@@ -55,32 +73,6 @@ PID COMMAND
   describe "#upward_fifo_name" do
     it "should generate an upward fifo name" do
       @game.upward_fifo_name.should == "#{@test_temp_dir}/upward_fifo_#{@user.id}"
-    end
-  end
-
-  describe "#make_fifo" do
-    it "should make a fifo" do
-      fifo_path = File.join(@test_temp_dir, "i_am_a_fifo")
-      Game.make_fifo(fifo_path)
-      `ls -l #{fifo_path}`.should =~ /^p/
-    end
-  end
-
-  describe "#make_fifos" do
-    it "should make and upward and downward fifos" do
-      @game.make_fifos
-      `ls -l #{@game.downward_fifo_name}`.should =~ /^p/
-      `ls -l #{@game.upward_fifo_name}`.should =~ /^p/
-    end
-  end
-
-  describe "#unlink_fifos" do
-    it "should unlink the upward and downward fifos" do
-      @game.make_fifos
-      @game.unlink_fifos
-
-      File.exist?(@game.downward_fifo_name).should be_false
-      File.exist?(@game.upward_fifo_name).should be_false
     end
   end
 

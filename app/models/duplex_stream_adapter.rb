@@ -45,7 +45,7 @@ class DuplexStreamAdapter
         logger.info e.inspect
         exception = e
       ensure
-        if almost_done
+        if almost_done && upward_buffer.empty?
           raise exception
         end
         if exception
