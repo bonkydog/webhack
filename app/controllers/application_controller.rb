@@ -32,7 +32,6 @@ class ApplicationController < ActionController::Base
 
   def in_game
     @game = Game.new(current_user)
-    return true # temporarily disabling session termination.
     if @game.running?
       return true
     else
